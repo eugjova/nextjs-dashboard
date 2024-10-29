@@ -13,6 +13,7 @@ export default function LoginPage() {
         </div>
         <LoginForm />
       </div>
+      <div>lalalal</div>
     </main>
   );
 }

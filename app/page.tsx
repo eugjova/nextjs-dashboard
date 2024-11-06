@@ -10,6 +10,11 @@ import Link from 'next/link';
 import '@/app/ui/global.css';
 import { kanit, lusitana, oswald, roboto } from '@/app/ui/fonts';
 import Image from 'next/image';
+import { Metadata} from 'next';
+
+export const metadata: Metadata = {
+  title: 'SIBROMEN',
+};
  
 export default function Page() {
  
@@ -68,6 +73,9 @@ export default function Page() {
       <div id="home" className="mt-20 px-16 relative flex flex-col md:flex-row items-start md:items-center justify-between">
         <div className="relative flex items-center justify-start p-6 md:w-1/2 md:px-28 md:py-12">
           <div className="absolute top-20 left-2/3 transform -translate-x-1/2">
+            <div className="smoke"></div>
+            <div className="smoke"></div>
+            <div className="smoke"></div>
             <div className="smoke"></div>
             <div className="smoke"></div>
             <div className="smoke"></div>

@@ -53,3 +53,9 @@
 //     </main>
 //   );
 // }
+
+export default function dashboard(){
+    return(<div>
+        haeloooo
+    </div>)
+}

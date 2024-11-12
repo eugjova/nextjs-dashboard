@@ -3,17 +3,17 @@ import { Suspense } from 'react';
 import {
   SearchSkeleton,
   CreateSkeleton,
-  CustomersTableSkeleton
+  // CustomersTableSkeleton
 } from '@/app/ui/skeletons';
 import Search from '@/app/ui/search';
 import Table from '@/app/ui/distributors/table';
-// import Form from '@/app/ui/customers/create-form';
-// import { fetchCustomersPages } from '@/app/lib/data';
+import Form from '@/app/ui/distributors/create-form';
+import { fetchCustomersPages } from '@/app/lib/data';
 // import Pagination from '@/app/ui/customers/pagination';
 import { Metadata } from 'next';
  
 export const metadata: Metadata = {
-  title: 'Pegawai',
+  title: 'Distributor',
 };
 
 export default async function Page(
@@ -32,21 +32,23 @@ export default async function Page(
   await new Promise((resolve) => setTimeout(resolve, 3000));
   return (
     <div className="flex min-h-screen flex-col">
-         <p className={`${oswald.className} text-3xl text-white`}>Pegawai Page</p>
+         <p className={`${oswald.className} text-3xl text-white`}>Distributor Page</p>
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
         <Suspense fallback={<SearchSkeleton />}>
-          <Search placeholder="Search pegawai..." />
+          <Search placeholder="Search distributor..." />
         </Suspense>
         <Suspense fallback={<CreateSkeleton />}>
-          {/* <Form /> */}
+          <Form />
         </Suspense>
       </div>
 
-      <div className="mt flow-root">
+      <Table query={query} currentPage={currentPage} />
+
+      {/* <div className="mt flow-root">
         <Suspense key={query + currentPage} fallback={<CustomersTableSkeleton />}>
           <Table query={query} currentPage={currentPage} />
         </Suspense>
-      </div>
+      </div> */}
 
       <div className="mt-5 flex w-full justify-center">
         {/* <Pagination totalPages={totalPages} /> */}

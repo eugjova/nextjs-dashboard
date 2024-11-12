@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
+
   
 const FormSchema = z.object({
   id: z.string(),
@@ -25,18 +26,26 @@ const FormProductSchema = z.object({
   image_url: z.string(),
 });
 
-const FormServiceSchema = z.object({
+const FormDistributorSchema = z.object({
   id: z.string().optional(),
   name: z.string(),
-  price: z.coerce.number(),
-  estimation: z.coerce.number(),
+  phone: z.string(),
 });
 
 const FormSchemaCustomer = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   name: z.string(),
-  email: z.string(),
+  phone: z.string(),
+  gender: z.string(),
+  poin: z.string(),
   image_url: z.string(),
+});
+
+const FormSchemaPegawai = z.object({
+  id: z.string().optional(),
+  name: z.string(),
+  phone: z.string(),
+  gender: z.string(),
 });
 
 
@@ -46,11 +55,15 @@ const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 const CreateProduct = FormProductSchema.omit({ id: true });
 const UpdateProduct = FormProductSchema.omit({ id: true });
 
-const CreateService = FormServiceSchema.omit({ id: true });
-const UpdateService = FormServiceSchema.omit({ id: true });
+const CreateDistributors = FormDistributorSchema.omit({ id: true });
+const UpdateDistributors = FormDistributorSchema.omit({ id: true });
 
-const CreateCustomer = FormSchemaCustomer.omit({ id: true, date: true });
-const UpdateCustomer = FormSchemaCustomer.omit({ id: true, date: true });
+const CreateCustomer = FormSchemaCustomer.omit({ id: true});
+const UpdateCustomer = FormSchemaCustomer.omit({ id: true });
+
+const CreatePegawai = FormSchemaCustomer.omit({ id: true});
+const UpdatePegawai = FormSchemaCustomer.omit({ id: true });
+
 
 
 export async function createCustomer(formData: FormData) {
@@ -63,16 +76,18 @@ export async function createCustomer(formData: FormData) {
     console.log(filename);
   };
  
-  const { name, email, image_url } = CreateCustomer.parse({
+  const { name, phone, gender, poin, image_url } = CreateCustomer.parse({
     name : formData.get('name'), // Ensure name has a value
-    email : formData.get('email'), // Ensure email has a value
+    phone : formData.get('phone'), // Ensure email has a value
+    gender : formData.get('gender'),
+    poin : formData.get('poin'),
     image_url : filename,
   });
  
   try {
     await sql`
-      INSERT into customers (name, email, image_url)
-      VALUES (${name}, ${email}, ${image_url})
+      INSERT into customers (name, phone, gender, poin, image_url)
+      VALUES (${name}, ${phone}, ${gender}, ${poin} ${image_url})
       RETURNING id
       `;
   } catch (error) {
@@ -95,16 +110,18 @@ export async function updateCustomer(id: string, formData: FormData) {
     console.log(filename);
   };
  
-  const { name, email, image_url } = UpdateCustomer.parse({
+  const { name, phone, gender, poin, image_url } = UpdateCustomer.parse({
     name : formData.get('name'), // Ensure name has a value
-    email : formData.get('email'), // Ensure email has a value
+    phone : formData.get('email'), // Ensure email has a value
+    gender : formData.get('gender'),
+    poin : formData.get('poin'),
     image_url : filename,
   });
  
   try {
     await sql`
     UPDATE customers
-      SET name = ${name}, email = ${email}, image_url = ${image_url}
+      SET name = ${name}, phone = ${phone}, gender = ${gender}, poin = ${poin}, image_url = ${image_url}
       WHERE id = ${id}
       `;
   } catch (error) {
@@ -126,6 +143,158 @@ export async function deleteCustomer(id: string) {
     return { message: 'Deleted Customer.' };
   } catch (error) {
     return { message: 'Database Error: Failed to Delete Customer.' };
+  }
+}
+
+export async function createPegawai(formData: FormData) {
+  const img = formData.get('image');
+  console.log(img);
+ 
+  let filename = '';
+  if (img instanceof File) {
+    filename = '/pegawai/' + img.name;
+    console.log(filename);
+  };
+ 
+  const { name, phone, gender } = CreatePegawai.parse({
+    name : formData.get('name'), // Ensure name has a value
+    phone : formData.get('phone'), // Ensure email has a value
+    gender : formData.get('gender'),
+  });
+ 
+  try {
+    await sql`
+      INSERT into pegawai (name, phone, gender)
+      VALUES (${name}, ${phone}, ${gender})
+      RETURNING id
+      `;
+  } catch (error) {
+    return {
+      message: 'Database Error: Failed to Update Pegawai.',
+    };
+  }
+ 
+  revalidatePath('/dashboard/pegawai');
+  redirect('/dashboard/pegawai');
+}
+
+export async function updatePegawai(id: string, formData: FormData) {
+  const img = formData.get('image');
+  console.log(img);
+ 
+  let filename = '';
+  if (img instanceof File) {
+    filename = '/customers/' + img.name;
+    console.log(filename);
+  };
+ 
+  const { name, phone, gender } = UpdatePegawai.parse({
+    name : formData.get('name'), // Ensure name has a value
+    phone : formData.get('phone'), // Ensure email has a value
+    gender : formData.get('gender'),
+   
+  });
+ 
+  try {
+    await sql`
+    UPDATE pegawai
+      SET name = ${name}, phone = ${phone}, gender = ${gender}
+      WHERE id = ${id}
+      `;
+  } catch (error) {
+    return {
+      message: 'Database Error: Failed to Update Pegawai.',
+    };
+  }
+ 
+  revalidatePath('/dashboard/pegawai');
+  redirect('/dashboard/pegawai');
+}
+
+export async function deletePegawai(id: string) {
+  // throw new Error('Failed to Delete Invoice');
+ 
+  try {
+    await sql`DELETE FROM pegawai WHERE id = ${id}`;
+    revalidatePath('/dashboard/pegawai');
+    return { message: 'Deleted Pegawai.' };
+  } catch (error) {
+    return { message: 'Database Error: Failed to Delete Pegawai.' };
+  }
+}
+
+export async function createDistributors(formData: FormData) {
+  const img = formData.get('image');
+  console.log(img);
+ 
+  let filename = '';
+  if (img instanceof File) {
+    filename = '/distributors/' + img.name;
+    console.log(filename);
+  };
+ 
+  const { name, phone } = CreateDistributors.parse({
+    name : formData.get('name'), // Ensure name has a value
+    phone : formData.get('phone'), // Ensure email has a value
+  });
+ 
+  try {
+    await sql`
+      INSERT into distributors (name, phone)
+      VALUES (${name}, ${phone})
+      RETURNING id
+      `;
+  } catch (error) {
+    return {
+      message: 'Database Error: Failed to Update Distributor.',
+    };
+  }
+ 
+  revalidatePath('/dashboard/distributors');
+  redirect('/dashboard/distributors');
+}
+
+export async function updateDistributors(id: string, formData: FormData) {
+  const img = formData.get('image');
+  console.log(img);
+ 
+  let filename = '';
+  if (img instanceof File) {
+    filename = '/distributors/' + img.name;
+    console.log(filename);
+  };
+ 
+  const { name, phone} = UpdateDistributors.parse({
+    name : formData.get('name'), // Ensure name has a value
+    phone : formData.get('phone'), // Ensure email has a value
+   
+  });
+ 
+  try {
+    await sql`
+    UPDATE distributors
+      SET name = ${name}, phone = ${phone}
+      WHERE id = ${id}
+      `;
+  } catch (error) {
+    return {
+      message: 'Database Error: Failed to Update Distributor.',
+    };
+  }
+ 
+  revalidatePath('/dashboard/distributors');
+  redirect('/dashboard/distributors');
+}
+
+export async function deleteDistributors(id: string) {
+  // throw new Error('Failed to Delete Invoice');
+ 
+  try {
+    await sql`DELETE FROM distributors WHERE id = ${id}`;
+    revalidatePath('/dashboard/distributors');
+    return { message: 'Deleted Distributor.' };
+  } catch (error) {
+    return { message: 'Database Error: Failed to Delete Distributor.' };
   }
 }
 
@@ -257,40 +426,40 @@ export async function authenticate(
   }
 }
 
-export async function createService(formData: FormData) {
-  const { name, price, estimation } = CreateService.parse({
-    name: formData.get('name'),
-    price: formData.get('price'),
-    estimation: formData.get('estimation'),
-  });
+// export async function createService(formData: FormData) {
+//   const { name, price, estimation } = CreateService.parse({
+//     name: formData.get('name'),
+//     price: formData.get('price'),
+//     estimation: formData.get('estimation'),
+//   });
 
-  await sql`
-    INSERT INTO services (name, price, estimation)
-    VALUES (${name}, ${price}, ${estimation})
-  `;
+//   await sql`
+//     INSERT INTO services (name, price, estimation)
+//     VALUES (${name}, ${price}, ${estimation})
+//   `;
 
-  revalidatePath('/dashboard/services');
-  redirect('/dashboard/services');
-}
+//   revalidatePath('/dashboard/services');
+//   redirect('/dashboard/services');
+// }
 
-export async function updateService(id: string, formData: FormData) {
-  const { name, price, estimation } = UpdateService.parse({
-    name: formData.get('name'),
-    price: formData.get('price'),
-    estimation: formData.get('estimation'),
-  });
+// export async function updateService(id: string, formData: FormData) {
+//   const { name, price, estimation } = UpdateService.parse({
+//     name: formData.get('name'),
+//     price: formData.get('price'),
+//     estimation: formData.get('estimation'),
+//   });
  
-  await sql`
-  UPDATE services
-  SET name = ${name}, price = ${price}, estimation = ${estimation}
-  WHERE id = ${id}
-`;
+//   await sql`
+//   UPDATE services
+//   SET name = ${name}, price = ${price}, estimation = ${estimation}
+//   WHERE id = ${id}
+// `;
 
-revalidatePath('/dashboard/services');
-redirect('/dashboard/services');
-}
+// revalidatePath('/dashboard/services');
+// redirect('/dashboard/services');
+// }
 
-export async function deleteService(id: string) {
-  await sql`DELETE FROM services WHERE id = ${id}`;
-  revalidatePath('/dashboard/services');
-}
+// export async function deleteService(id: string) {
+//   await sql`DELETE FROM services WHERE id = ${id}`;
+//   revalidatePath('/dashboard/services');
+// }

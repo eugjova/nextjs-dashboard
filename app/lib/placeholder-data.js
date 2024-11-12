@@ -14,48 +14,6 @@ const roles = [
   },
 ];
 
-const poin = [
-  {
-    id: 'c3d48a1b-e5f8-491e-99d4-306ed781cb1a',
-    totalPoints: 50,
-  },
-  {
-    id: 'b9f7a6d1-4b5f-45d0-a5d1-0566a9e4c8c3',
-    totalPoints: 30,
-  },
-  {
-    id: '5c9f8b71-1a6d-48fb-82c0-743eafe5b4a9',
-    totalPoints: 70,
-  },
-  {
-    id: '0d1f6e89-8a45-4f9e-9d8a-3b7e6f5a4c2e',
-    totalPoints: 20,
-  },
-  {
-    id: '1b5e7c8a-9d4f-493e-90d8-7f3c5a2e9b4f',
-    totalPoints: 100,
-  },
-  {
-    id: 'd7e4f1b9-2a6f-408b-82e9-c1f9b4a3d5c7',
-    totalPoints: 40,
-  },
-  {
-    id: '6a8b1f3c-5d2e-4a6b-9c8f-0d1e5a7b8c4e',
-    totalPoints: 60,
-  },
-  {
-    id: '2f4e9d7c-3a1f-4b5e-6a8b-1c9f0e7d8a5b',
-    totalPoints: 80,
-  },
-  {
-    id: '4c9e7f1b-2d3f-4a5c-6b8e-0f1d2a7c3b5a',
-    totalPoints: 90,
-  },
-  {
-    id: '8a9c1d4e-5b2f-4f6e-7a8b-0d1e5c9b3a7f',
-    totalPoints: 110,
-  },
-]
  
 const customers = [
   {
@@ -65,7 +23,7 @@ const customers = [
     createdAt: TIMESTAMP,
     updatedAt: TIMESTAMP,
     gender: 'Male',
-    poin : poin[0].totalPoints,
+    poin : 50,
     image_url : '/customers/amy-burns.png',
   },
   {
@@ -75,7 +33,7 @@ const customers = [
     createdAt: TIMESTAMP,
     updatedAt: TIMESTAMP,
     gender: 'Female',
-    poin : poin[0].totalPoints,
+    poin :30,
     image_url : '/customers/balazs-orban.png',
   },
   {
@@ -85,7 +43,7 @@ const customers = [
     createdAt: TIMESTAMP,
     updatedAt: TIMESTAMP,
     gender: 'Female',
-    poin : poin[2].totalPoints,
+    poin : 70,
     image_url : '/customers/delba-de-oliveira.png',
   },
   {
@@ -95,7 +53,7 @@ const customers = [
     createdAt: TIMESTAMP,
     updatedAt: TIMESTAMP,
     gender: 'Female',
-    poin : poin[1].totalPoints,
+    poin : 20,
     image_url : '/customers/emil-kowalski.png',
   },
   {
@@ -105,7 +63,7 @@ const customers = [
     createdAt: TIMESTAMP,
     updatedAt: TIMESTAMP,
     gender: 'Female',
-    poin : poin[1].totalPoints,
+    poin : 100,
     image_url : '/customers/evil-rabbit.png',
   },
   {
@@ -115,7 +73,7 @@ const customers = [
     createdAt: TIMESTAMP,
     updatedAt: TIMESTAMP,
     gender: 'Male',
-    poin : poin[2].totalPoints,
+    poin : 40,
     image_url : '/customers/guillermo-rauch.png',
   },
   {
@@ -125,7 +83,7 @@ const customers = [
     createdAt: TIMESTAMP,
     updatedAt: TIMESTAMP,
     gender: 'Female',
-    poin : poin[4].totalPoints,
+    poin : 60,
     image_url : '/customers/hector-simpson.png',
   },
   {
@@ -135,7 +93,7 @@ const customers = [
     createdAt: TIMESTAMP,
     updatedAt: TIMESTAMP,
     gender: 'Male',
-    poin : poin[5].totalPoints,
+    poin : 80,
     image_url : '/customers/jared-palmer.png',
   },
   {
@@ -145,7 +103,7 @@ const customers = [
     createdAt: TIMESTAMP,
     updatedAt: TIMESTAMP,
     gender: 'Male',
-    poin : poin[0].totalPoints,
+    poin : 90,
     image_url : '/customers/lee-robinson.png',
   },
   {
@@ -155,7 +113,7 @@ const customers = [
     createdAt: TIMESTAMP,
     updatedAt: TIMESTAMP,
     gender: 'Male',
-    poin : poin[6].totalPoints,
+    poin : 110,
     image_url : '/customers/michael-novotny.png',
   },
 ];
@@ -869,7 +827,6 @@ module.exports = {
   products,
   penjualan,
   pembelian,
-  poin,
   stock,
   DetailTransaksiPenjualan,
   DetailTransaksiPembelian

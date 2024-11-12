@@ -1,13 +1,13 @@
 import Image from 'next/image';
 import { lusitana } from '@/app/ui/fonts';
 import Search from '@/app/ui/search';
-// import { UpdateCustomer, DeleteCustomer } from '@/app/ui/distributors/buttons';
-// import { fetchFilteredCustomers } from '@/app/lib/data';
+import { fetchFilteredDistributors } from '@/app/lib/data';
 import {
   CustomersTableType,
   FormattedCustomersTable,
 } from '@/app/lib/definitions';
 import { distributors } from '@/app/lib/placeholder-data';
+import { DeleteDistributor, UpdateDistributor } from './buttons';
 
 export default async function DistributorTable({
   query,
@@ -16,7 +16,7 @@ export default async function DistributorTable({
   query: string;
   currentPage: number;
 }) {
-  // const distributors = await fetchFilteredCustomers(query, currentPage);
+  const distributors = await fetchFilteredDistributors(query, currentPage);
   return (
     <div className="w-full">
       <div className="mt-6 flow-root">
@@ -51,8 +51,8 @@ export default async function DistributorTable({
                   <div>
                   </div>
                   <div className="flex justify-end gap-2">
-                    {/* <UpdateCustomer id={distributors.id} />
-                    <DeleteCustomer id={distributors.id} /> */}
+                    <UpdateDistributor id={distributors.id} />
+                    <DeleteDistributor id={distributors.id} />
                   </div>
                 </div>
                     </div>
@@ -110,10 +110,10 @@ export default async function DistributorTable({
                         {distributors.total_paid}
                       </td> */}
                       <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                        {/* <div className="flex justify-end gap-3">
-                          <UpdateCustomer id={distributors.id} />
-                          <DeleteCustomer id={distributors.id} />
-                        </div> */}
+                        <div className="flex justify-end gap-3">
+                          <UpdateDistributor id={distributors.id} />
+                          <DeleteDistributor id={distributors.id} />
+                        </div>
                       </td>
                     </tr>
                   ))}

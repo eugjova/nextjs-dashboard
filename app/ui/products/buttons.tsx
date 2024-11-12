@@ -40,7 +40,7 @@ export function DeleteProduct({ id }: { id: string }) {
     <>
       <button
         type="button"
-        className="rounded-md border p-2 hover:bg-red-700"
+        className="rounded-md border p-2 hover:bg-red-500"
         onClick={() => setModalOpen(true)}
       >
         <span className="sr-only">Delete</span>

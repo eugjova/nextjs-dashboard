@@ -9,7 +9,6 @@ const {
   products,
   penjualan,
   pembelian,
-  poin,
   stock,
   DetailTransaksiPenjualan,
   DetailTransaksiPembelian
@@ -66,7 +65,9 @@ async function seedCustomers(client) {
         phone VARCHAR(255) NOT NULL,
         createdAt DATE DEFAULT CURRENT_DATE,
         updatedAt DATE DEFAULT CURRENT_DATE,
-        gender VARCHAR(255) NOT NULL
+        gender VARCHAR(255) NOT NULL,
+        poin INT NOT NULL,
+        image_url VARCHAR(255) NOT NULL
       );
     `;
  
@@ -78,8 +79,8 @@ async function seedCustomers(client) {
     const insertedCustomers = await Promise.all(
       customers.map(
         (customer) => client.sql`
-        INSERT INTO customers (id, name, phone, createdAt, updatedAt, gender)
-        VALUES (${customer.id}, ${customer.name}, ${customer.phone}, ${currentDate}, ${currentDate},  ${customer.gender})
+        INSERT INTO customers (id, name, phone, createdAt, updatedAt, gender, poin, image_url)
+        VALUES (${customer.id}, ${customer.name}, ${customer.phone}, ${currentDate}, ${currentDate},  ${customer.gender}, ${customer.poin}, ${customer.image_url})
         ON CONFLICT (id) DO NOTHING;
      
       `,
@@ -309,42 +310,6 @@ async function seedPembelian(client) {
   }
 }
  
-async function seedPoin(client) {
-  try {
-    await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
- 
-    // Create the "products" table if it doesn't exist
-    const createTable = await client.sql`
-      CREATE TABLE IF NOT EXISTS poin (
-        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-        totalPoints INT NOT NULL
-      );
-    `;
- 
-    console.log(`Created "poin" table`);
- 
-    // Insert data into the "products" table
-    const insertedPoin = await Promise.all(
-      poin.map(
-        (poin) => client.sql`
-        INSERT INTO poin (id, totalPoints)
-        VALUES (${poin.id},  ${poin.totalPoints})
-        ON CONFLICT (id) DO NOTHING;
-      `,
-      ),
-    );
- 
-    console.log(`Seeded ${insertedPoin.length} poin`);
- 
-    return {
-      createTable,
-      poin : insertedPoin,
-    };
-  } catch (error) {
-    console.error('Error seeding poin:', error);
-    throw error;
-  }
-}
  
 async function seedStock(client) {
   try {
@@ -516,7 +481,6 @@ async function main() {
   await seedProducts(client);
   await seedPenjualan(client);
   await seedPembelian(client);
-  await seedPoin(client);
   await seedStock(client);
   await seedDetailTransaksiPembelian(client);
   await seedDetailTransaksiPenjualan(client);

@@ -1,17 +1,22 @@
 'use client';
 
+import { CustomerField } from '@/app/lib/definitions';
 import {
-  CurrencyDollarIcon,
+  UserCircleIcon,
+  EnvelopeIcon,
+  InboxArrowDownIcon,
   PlusIcon,
-  ArchiveBoxIcon,
-  RectangleStackIcon,
-  InboxArrowDownIcon
+  PhoneIcon,
+  IdentificationIcon,
+  CheckBadgeIcon,
+  GiftIcon,
+  KeyIcon
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
-import { CreateProduct } from './buttons';
-import Breadcrumbs from '@/app/ui/products/breadcrumbs';
+import { createPegawai } from '@/app/lib/action';
+import Breadcrumbs from '@/app/ui/distributors/breadcrumbs';
 import { useState } from 'react';
-import { createProduct } from '@/app/lib/action';
+import { distributors } from '@/app/lib/placeholder-data';
 
 export default function Form() {
   const [modal, setModal] = useState(false);
@@ -24,20 +29,20 @@ export default function Form() {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     try {
-      await createProduct(formData);
+      await createPegawai(formData);
       setModal(false);
     } catch (error) {
-      console.error('Failed to create product:', error);
+      console.error('Failed to create distributors:', error);
     }
   }
 
   return (
     <div className="flex items-start justify-center">
       <button
-        className="flex h-10 items-center rounded-lg bg-red-600 px-4 text-sm font-medium text-white transition-colors hover:bg-fuschia-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+        className="flex h-10 items-center rounded-lg bg-red-600 px-4 text-sm font-medium text-white transition-colors hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuschia-600"
         onClick={handleChange}
       >
-        <span className="hidden md:block">Create Product</span>{' '}
+        <span className="hidden md:block">Create Distributor</span>{' '}
         <PlusIcon className="h-5 md:ml-4" />
       </button>
       {modal && (
@@ -47,10 +52,10 @@ export default function Form() {
               <div className="mb-4">
                 <Breadcrumbs
                   breadcrumbs={[
-                    { label: 'Products', href: '/dashboard/products' },
+                    { label: 'Distributor', href: '/dashboard/distributors' },
                     {
-                      label: 'Create Product',
-                      href: '/dashboard/products/create',
+                      label: 'Create Distributor',
+                      href: '/dashboard/distributors/create',
                       active: true,
                     },
                   ]}
@@ -59,7 +64,7 @@ export default function Form() {
 
               <div className="mb-4">
                 <label htmlFor="name" className="mb-2 block text-sm font-medium">
-                  Enter Product Name
+                  Distributor Name
                 </label>
                 <div className="relative mt-2 rounded-md">
                   <div className="relative">
@@ -67,68 +72,51 @@ export default function Form() {
                       id="name"
                       name="name"
                       type="text"
-                      placeholder="Enter Product Name"
+                      placeholder="Enter Distributor Name"
                       className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
                     />
-                    <ArchiveBoxIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+                    <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
                   </div>
                 </div>
               </div>
 
               <div className="mb-4">
-                <label htmlFor="stock" className="mb-2 block text-sm font-medium">
-                  Enter Stock
+                <label htmlFor="phone" className="mb-2 block text-sm font-medium">
+                 Distributor Phone
                 </label>
                 <div className="relative mt-2 rounded-md">
                   <div className="relative">
                     <input
-                      id="stock"
-                      name="stock"
-                      type="number"
-                      placeholder="Enter Stock Quantity"
+                      id="phone"
+                      name="phone"
+                      type="phone"
+                      placeholder="Enter Distributor Phone"
                       className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
                     />
-                    <RectangleStackIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+                    <PhoneIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
                   </div>
                 </div>
               </div>
 
-              <div className="mb-4">
-                <label htmlFor="price" className="mb-2 block text-sm font-medium">
-                  Enter Price
-                </label>
-                <div className="relative mt-2 rounded-md">
-                  <div className="relative">
-                    <input
-                      id="price"
-                      name="price"
-                      type="number"
-                      step="0.01"
-                      placeholder="Enter Price in IDR"
-                      className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                    />
-                    <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-                  </div>
-                </div>
-              </div>
 
-              <div className="mb-4">
+
+              {/* <div className="mb-4">
                 <label htmlFor="image" className="mb-2 block text-sm font-medium">
-                  Choose Product Image
+                  Upload Customer Image
                 </label>
                 <div className="relative mt-2 rounded-md">
                   <div className="relative">
-                  <input
-                    id="image"
-                    name="image"
-                    type="file"
-                    accept="image/*"
-                      className="block w-full rounded-md border border-gray-200 py-2 pl-10 pr-3 text-sm outline-2 placeholder:text-gray-500"
+                    <input
+                      id="image"
+                      name="image"
+                      type="file"
+                      accept="image/*"
+                      className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
                     />
-                    <InboxArrowDownIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
+                    <InboxArrowDownIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               <div className="mt-6 flex justify-end gap-4">
                 <button
@@ -138,7 +126,7 @@ export default function Form() {
                 >
                   Cancel
                 </button>
-                <Button type="submit">Create Product</Button>
+                <Button type="submit">Create Distributor</Button>
               </div>
             </form>
           </div>

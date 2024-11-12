@@ -145,15 +145,21 @@ export type CustomersTableType = {
   image_url: string;
   gender : string;
   poin : string;
-  total_penjualan: number;
+};
+
+export type PegawaiTableType = {
+  id: string;
+  name: string;
+  phone: string;
+  gender : string;
+  email : string;
+  password : string;
 };
 
 export type DistributorTableType = {
   id: string;
   name: string;
   phone: string;
-  createdAt : string;
-  updateAt : string;
 };
 
 export type PoinTableType = {
@@ -182,7 +188,9 @@ export type CustomerField = {
   id: string;
   name: string;
   phone: string;
+  gender : string
 };
+
 
 export type DistributorField = {
   id: string;
@@ -232,15 +240,24 @@ export type CustomersForm = {
   id: string;
   name: string;
   phone: string;
+  gender : string;
+  poin : string;
   image_url: string;
+};
+
+export type PegawaiForm = {
+  id: string;
+  name: string;
+  phone: string;
+  gender : string;
+  email : string;
+  password : string;
 };
 
 export type DistributorForm = {
   id: string;
   name: string;
   phone: string;
-  createdAt: string;
-  updatedAt: string;
 };
 
 

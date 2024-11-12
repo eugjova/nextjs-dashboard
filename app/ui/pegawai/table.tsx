@@ -1,13 +1,13 @@
 import Image from 'next/image';
 import { lusitana } from '@/app/ui/fonts';
 import Search from '@/app/ui/search';
-// import { UpdateCustomer, DeleteCustomer } from '@/app/ui/pegawai/buttons';
-// import { fetchFilteredCustomers } from '@/app/lib/data';
+import { UpdatePegawai, DeletePegawai } from '@/app/ui/pegawai/buttons';
 import {
   CustomersTableType,
   FormattedCustomersTable,
 } from '@/app/lib/definitions';
 import { pegawai } from '@/app/lib/placeholder-data';
+import { fetchFilteredPegawai } from '@/app/lib/data';
 
 export default async function PegawaiTable({
   query,
@@ -16,7 +16,7 @@ export default async function PegawaiTable({
   query: string;
   currentPage: number;
 }) {
-  // const pegawai = await fetchFilteredCustomers(query, currentPage);
+  const pegawai = await fetchFilteredPegawai(query, currentPage);
   return (
     <div className="w-full">
       <div className="mt-6 flow-root">
@@ -51,22 +51,21 @@ export default async function PegawaiTable({
                   <div>
                   </div>
                   <div className="flex justify-end gap-2">
-                    {/* <UpdateCustomer id={pegawai.id} />
-                    <DeleteCustomer id={pegawai.id} /> */}
+                    <UpdatePegawai id={pegawai.id} />
+                    <DeletePegawai id={pegawai.id} />
                   </div>
                 </div>
                     </div>
                     <div className="flex w-full items-center justify-between border-b py-5">
                       <div className="flex w-1/2 flex-col">
-                        <p className="text-xs">Pending</p>
                         <p className="font-medium">{pegawai.gender}</p>
                       </div>
                       <div className="flex w-1/2 flex-col">
-                        <p className="text-xs">Paid</p>
+
                         <p className="font-medium">{pegawai.email}</p>
                       </div>
                       <div className="flex w-1/2 flex-col">
-                        <p className="text-xs">Paid</p>
+                       
                         <p className="font-medium">{pegawai.password}</p>
                       </div>
                     </div>
@@ -128,10 +127,10 @@ export default async function PegawaiTable({
                         {pegawai.total_paid}
                       </td> */}
                       <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                        {/* <div className="flex justify-end gap-3">
-                          <UpdateCustomer id={pegawai.id} />
-                          <DeleteCustomer id={pegawai.id} />
-                        </div> */}
+                        <div className="flex justify-end gap-3">
+                          <UpdatePegawai id={pegawai.id} />
+                          <DeletePegawai id={pegawai.id} />
+                        </div>
                       </td>
                     </tr>
                   ))}

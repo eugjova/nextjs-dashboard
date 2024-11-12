@@ -3,12 +3,12 @@ import { Suspense } from 'react';
 import {
   SearchSkeleton,
   CreateSkeleton,
-  CustomersTableSkeleton
+  // CustomersTableSkeleton
 } from '@/app/ui/skeletons';
 import Search from '@/app/ui/search';
 import Table from '@/app/ui/customers/table';
-// import Form from '@/app/ui/customers/create-form';
-// import { fetchCustomersPages } from '@/app/lib/data';
+import Form from '@/app/ui/customers/create-form';
+import { fetchCustomersPages } from '@/app/lib/data';
 // import Pagination from '@/app/ui/customers/pagination';
 import { Metadata } from 'next';
  
@@ -38,15 +38,16 @@ export default async function Page(
           <Search placeholder="Search customers..." />
         </Suspense>
         <Suspense fallback={<CreateSkeleton />}>
-          {/* <Form /> */}
+          <Form />
         </Suspense>
       </div>
 
-      <div className="mt flow-root">
+      <Table query={query} currentPage={currentPage} />
+      {/* <div className="mt flow-root">
         <Suspense key={query + currentPage} fallback={<CustomersTableSkeleton />}>
           <Table query={query} currentPage={currentPage} />
         </Suspense>
-      </div>
+      </div> */}
 
       <div className="mt-5 flex w-full justify-center">
         {/* <Pagination totalPages={totalPages} /> */}

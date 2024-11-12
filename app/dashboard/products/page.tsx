@@ -9,8 +9,8 @@ import {
   ProductsTableSkeleton
 } from '@/app/ui/skeletons';
 import Table from '@/app/ui/products/table';
-// import Form from '@/app/ui/products/create-form';
-// import { fetchProductsPages } from '@/app/lib/data';
+import Form from '@/app/ui/products/create-form';
+import { fetchProductsPages } from '@/app/lib/data';
 
 export const metadata: Metadata = {
   title: 'Products',
@@ -26,7 +26,7 @@ export default async function Page({
 }) {
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
-  // const totalPages = await fetchProductsPages(query);
+  const totalPages = await fetchProductsPages(query);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -36,7 +36,7 @@ export default async function Page({
           <Search placeholder="Search products..." />
         </Suspense>
         <Suspense fallback={<CreateSkeleton />}>
-      {/* <Form /> */}
+      <Form />
       </Suspense>
       </div>
 

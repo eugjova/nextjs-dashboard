@@ -46,6 +46,8 @@ const FormSchemaPegawai = z.object({
   name: z.string(),
   phone: z.string(),
   gender: z.string(),
+  email: z.string(),
+  password: z.string(),
 });
 
 
@@ -61,8 +63,8 @@ const UpdateDistributors = FormDistributorSchema.omit({ id: true });
 const CreateCustomer = FormSchemaCustomer.omit({ id: true});
 const UpdateCustomer = FormSchemaCustomer.omit({ id: true });
 
-const CreatePegawai = FormSchemaCustomer.omit({ id: true});
-const UpdatePegawai = FormSchemaCustomer.omit({ id: true });
+const CreatePegawai = FormSchemaPegawai.omit({ id: true});
+const UpdatePegawai = FormSchemaPegawai.omit({ id: true });
 
 
 
@@ -112,7 +114,7 @@ export async function updateCustomer(id: string, formData: FormData) {
  
   const { name, phone, gender, poin, image_url } = UpdateCustomer.parse({
     name : formData.get('name'), // Ensure name has a value
-    phone : formData.get('email'), // Ensure email has a value
+    phone : formData.get('phone'), // Ensure email has a value
     gender : formData.get('gender'),
     poin : formData.get('poin'),
     image_url : filename,
@@ -122,8 +124,7 @@ export async function updateCustomer(id: string, formData: FormData) {
     await sql`
     UPDATE customers
       SET name = ${name}, phone = ${phone}, gender = ${gender}, poin = ${poin}, image_url = ${image_url}
-      WHERE id = ${id}
-      `;
+      WHERE id = ${id}`;
   } catch (error) {
     return {
       message: 'Database Error: Failed to Update Customer.',
@@ -156,51 +157,75 @@ export async function createPegawai(formData: FormData) {
     console.log(filename);
   };
  
-  const { name, phone, gender } = CreatePegawai.parse({
-    name : formData.get('name'), // Ensure name has a value
-    phone : formData.get('phone'), // Ensure email has a value
-    gender : formData.get('gender'),
-  });
- 
-  try {
-    await sql`
-      INSERT into pegawai (name, phone, gender)
-      VALUES (${name}, ${phone}, ${gender})
-      RETURNING id
-      `;
-  } catch (error) {
+  const name = formData.get('name') as string | null;
+  const phone = formData.get('phone') as string | null;
+  const gender = formData.get('gender') as string | null;
+  const email = formData.get('email') as string | null;
+  const password = formData.get('password') as string | null;
+
+  // Check for required fields and handle errors
+  if (!name || !phone || !gender || !email || !password) {
     return {
-      message: 'Database Error: Failed to Update Pegawai.',
+      message: 'Validation Error: Missing required fields.',
+      errorDetails: [
+        { field: 'name', received: name },
+        { field: 'phone', received: phone },
+        { field: 'gender', received: gender },
+        { field: 'email', received: email },
+        { field: 'password', received: password },
+      ]
     };
   }
- 
+
+  // Validate form data structure
+  const parsedData = CreatePegawai.safeParse({
+    name,
+    phone,
+    gender,
+    email,
+    password
+  });
+
+  if (!parsedData.success) {
+    return {
+      message: 'Validation Error: Invalid input data.',
+      errorDetails: parsedData.error.errors,
+    };
+  }
+
+  // Insert data into database
+  try {
+    await sql`
+      INSERT INTO pegawai (name, phone, gender, email, password, image_path)
+      VALUES (${name}, ${phone}, ${gender}, ${email}, ${password}, ${filename})
+      RETURNING id
+    `;
+  } catch (error) {
+    console.error('Database error:', error);
+    return {
+      message: 'Database Error: Failed to create Pegawai record.',
+    };
+  }
+
+  // Revalidate path and redirect
   revalidatePath('/dashboard/pegawai');
   redirect('/dashboard/pegawai');
 }
 
 export async function updatePegawai(id: string, formData: FormData) {
-  const img = formData.get('image');
-  console.log(img);
- 
-  let filename = '';
-  if (img instanceof File) {
-    filename = '/customers/' + img.name;
-    console.log(filename);
-  };
- 
-  const { name, phone, gender } = UpdatePegawai.parse({
+  const { name, phone, gender, email, password } = UpdatePegawai.parse({
     name : formData.get('name'), // Ensure name has a value
     phone : formData.get('phone'), // Ensure email has a value
     gender : formData.get('gender'),
-   
+    email : formData.get('email'),
+    password : formData.get('password'),
   });
  
   try {
     await sql`
     UPDATE pegawai
-      SET name = ${name}, phone = ${phone}, gender = ${gender}
-      WHERE id = ${id}
-      `;
+      SET name = ${name}, phone = ${phone}, gender = ${gender}, email = ${email}, password = ${password}
+      WHERE id = ${id}`;
   } catch (error) {
     return {
       message: 'Database Error: Failed to Update Pegawai.',
@@ -352,27 +377,45 @@ export async function createProduct(formData: FormData) {
     console.log(fileName);
   }
 
-  const { name, price, stock, image_url } = CreateProduct.parse({
-    name: formData.get('name'),
-    price: formData.get('price'),
-    stock: formData.get('stock'),
-    image_url: fileName,
-  });
+  const name = formData.get('name') as string | null;
+  const price = formData.get('price') as string | null;
+  const stock = formData.get('stock') as string | null;
+
+  // Check for missing required fields and handle them
+  if (!name || !price || !stock) {
+    return {
+      message: 'Please fill in all required fields.',
+    };
+  }
 
   try {
-  await sql`
-    INSERT INTO products (name, price, stock, image_url)
-    VALUES (${name}, ${price}, ${stock}, ${image_url})
-  `;
-} catch (error) {
-  return {
-    message: 'Database Error: Failed to Create Products.',
-  };
-}
+    // Validate data using Zod
+    const parsedData = CreateProduct.parse({
+      name,
+      price: parseFloat(price), // Ensure price is parsed to a number
+      stock: parseInt(stock),    // Ensure stock is parsed to an integer
+      image_url: fileName,
+    });
 
+    await sql`
+      INSERT INTO products (name, price, stock, image_url)
+      VALUES (${parsedData.name}, ${parsedData.price}, ${parsedData.stock}, ${parsedData.image_url})
+      RETURNING id
+    `;
 
-  revalidatePath('/dashboard/products');
-  redirect('/dashboard/products');
+    revalidatePath('/dashboard/products');
+    redirect('/dashboard/products');
+    // Return success message
+    return {
+      message: 'Product successfully created.',
+    };
+  } catch (error) {
+    console.error('Error creating product:', error);
+    return {
+      message: 'Database Error: Failed to Create Product.',
+    };
+  }
+
 }
 
 export async function updateProduct(id: string, formData: FormData) {
@@ -385,11 +428,12 @@ export async function updateProduct(id: string, formData: FormData) {
     console.log(fileName);
   }
 
+  const imageUrl = fileName || formData.get('image_url') || '';
   const { name, price, stock, image_url } = UpdateProduct.parse({
     name: formData.get('name'),
     price: formData.get('price'),
     stock: formData.get('stock'),
-    image_url: formData.get('image_url'),
+    image_url: imageUrl,
   });
 
   await sql`

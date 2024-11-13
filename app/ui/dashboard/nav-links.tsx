@@ -40,7 +40,7 @@ export default function NavLinks({ collapsed }: NavLinksProps) {
             key={link.name}
             href={link.href}
             className={clsx(
-              'flex h-[40px] items-center justify-start gap-2 rounded-md bg-white p-3 text-sm font-medium transition duration-700 hover:bg-red-500 hover:text-gray-800 md:flex-none md:justify-start md:p-2 md:px-3 mb-3',
+              'flex h-[40px] items-center justify-start gap-2 rounded-md bg-white p-3 text-sm font-medium transition duration-700 hover:bg-red-500 hover:text-gray-800 md:flex-none md:justify-start md:p-2 md:px-3 mb-3 z-50',
               {
                 'bg-gradient-to-r from-red-700 to-red-500 hover:text-yellow-400': pathname === link.href,
               },
@@ -54,3 +54,4 @@ export default function NavLinks({ collapsed }: NavLinksProps) {
     </>
   );
 }
+

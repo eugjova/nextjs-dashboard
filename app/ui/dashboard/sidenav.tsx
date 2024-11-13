@@ -75,7 +75,7 @@ export default function SideNav() {
   );
 
   return (
-    <div className={`fixed flex h-full flex-col px-3 py-4 md:px-2 bg-white text-black ${collapsed ? 'w-16' : 'sm:w-16 md:w-64'} transition-all duration-300 shadow-xl`}>
+    <div className={`fixed flex h-full flex-col px-3 py-4 md:px-2 bg-white text-black ${collapsed ? 'w-16' : 'sm:w-16 md:w-64'} transition-all duration-300 shadow-xl z-50`}>
       <header className="w-full bg-white">
         <nav className="fixed inset-x-0 top-0 z-50 w-full bg-white shadow-xl border-b border-gray-900 px-4 py-2 transition duration-700 ease-out">
           <div className="flex justify-between p-1 items-center">

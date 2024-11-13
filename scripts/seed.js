@@ -201,7 +201,8 @@ async function seedProducts(client) {
         price INT NOT NULL,
         distributorId UUID NOT NULL,
         createdAt DATE NOT NULL,
-        updatedAt DATE NOT NULL
+        updatedAt DATE NOT NULL,
+        image_url VARCHAR(255) NOT NULL
       );
     `;
  
@@ -211,8 +212,8 @@ async function seedProducts(client) {
     const insertedProducts = await Promise.all(
       products.map(
         (product) => client.sql`
-        INSERT INTO products (id, name, stock, price, distributorId, createdAt, updatedAt)
-        VALUES (${product.id}, ${product.name}, ${product.stock}, ${product.price}, ${product.distributorId}, ${product.createdAt}, ${product.updatedAt})
+        INSERT INTO products (id, name, stock, price, distributorId, createdAt, updatedAt, image_url)
+        VALUES (${product.id}, ${product.name}, ${product.stock}, ${product.price}, ${product.distributorId}, ${product.createdAt}, ${product.updatedAt}, ${product.image_url})
         ON CONFLICT (id) DO NOTHING;
       `,
       ),
@@ -240,6 +241,7 @@ async function seedPenjualan(client) {
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
         id_pegawai UUID NOT NULL,
         customerId UUID NOT NULL,
+        id_produk UUID NOT NULL,
         jumlah INT NOT NULL,
         total INT NOT NULL,
         date DATE NOT NULL
@@ -252,8 +254,8 @@ async function seedPenjualan(client) {
     const insertedPenjualan = await Promise.all(
       penjualan.map(
         (penjualan) => client.sql`
-        INSERT INTO penjualan (id, id_pegawai, customerId, jumlah, total, date)
-        VALUES (${penjualan.id}, ${penjualan.id_pegawai}, ${penjualan.customerId}, ${penjualan.jumlah}, ${penjualan.total},  ${penjualan.date})
+        INSERT INTO penjualan (id, id_pegawai, customerId, id_produk, jumlah, total, date)
+        VALUES (${penjualan.id}, ${penjualan.id_pegawai}, ${penjualan.customerId}, ${penjualan.id_produk}, ${penjualan.jumlah}, ${penjualan.total},  ${penjualan.date})
         ON CONFLICT (id) DO NOTHING;
       `,
       ),
@@ -482,9 +484,9 @@ async function main() {
   await seedPenjualan(client);
   await seedPembelian(client);
   await seedStock(client);
+  await seedRevenue(client);
   await seedDetailTransaksiPembelian(client);
   await seedDetailTransaksiPenjualan(client);
-  await seedRevenue(client);
  
   await client.end();
 }

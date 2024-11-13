@@ -20,8 +20,8 @@ export default function EditProductForm({
   const updateProductWithId = updateProduct.bind(null, product.id);
 
   return (
-    <div className="place-content-center flex items-center justify-center">
-      <div className="relative bg-white p-4 md:p-6 rounded-md shadow-md border border-gray-300 w-full max-w-xl">
+    <div className="flex items-center justify-center mt-20">
+      <div className="relative bg-white p-6 md:p-8 rounded-md shadow-md border border-gray-300 w-full max-w-xl">
         <form action={updateProductWithId}>
           <div className="rounded-md bg-gray-50 p-4 md:p-6">
           <div className="mb-4">
@@ -29,7 +29,7 @@ export default function EditProductForm({
                   Enter Product Name
                 </label>
                 <div className="relative mt-2 rounded-md">
-                  <div className="relative">
+                  {/* <div className="relative"> */}
                     <input
                       id="name"
                       name="name"
@@ -39,7 +39,7 @@ export default function EditProductForm({
                       className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
                     />
                     <ArchiveBoxIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-                  </div>
+                  {/* </div> */}
                 </div>
               </div>
 
@@ -48,7 +48,7 @@ export default function EditProductForm({
                   Enter Stock
                 </label>
                 <div className="relative mt-2 rounded-md">
-                  <div className="relative">
+                  {/* <div className="relative"> */}
                     <input
                       id="stock"
                       name="stock"
@@ -58,7 +58,7 @@ export default function EditProductForm({
                       className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
                     />
                     <RectangleStackIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-                  </div>
+                  {/* </div> */}
                 </div>
               </div>
 

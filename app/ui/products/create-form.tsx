@@ -8,12 +8,16 @@ import {
   InboxArrowDownIcon
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
-import { CreateProduct } from './buttons';
 import Breadcrumbs from '@/app/ui/products/breadcrumbs';
 import { useState } from 'react';
 import { createProduct } from '@/app/lib/action';
+import { ProductsField } from '@/app/lib/definitions';
 
-export default function Form() {
+export default function Form({
+  products,
+}: {
+  products: ProductsField[];
+}) {
   const [modal, setModal] = useState(false);
 
   function handleChange() {
@@ -25,19 +29,20 @@ export default function Form() {
     const formData = new FormData(event.currentTarget);
     try {
       await createProduct(formData);
-      setModal(false);
+        setModal(false);
     } catch (error) {
       console.error('Failed to create product:', error);
     }
   }
 
   return (
+    <form action={createProduct}>
     <div className="flex items-start justify-center">
       <button
         className="flex h-10 items-center rounded-lg bg-red-600 px-4 text-sm font-medium text-white transition-colors hover:bg-fuschia-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
         onClick={handleChange}
       >
-        <span className="hidden md:block">Create Product</span>{' '}
+        <span className="hidden md:block">Create Product</span>
         <PlusIcon className="h-5 md:ml-4" />
       </button>
       {modal && (
@@ -145,5 +150,6 @@ export default function Form() {
         </div>
       )}
     </div>
+    </form>
   );
 }

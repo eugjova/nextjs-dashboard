@@ -254,7 +254,7 @@ export async function fetchFilteredCustomers(
   query: string,
   currentPage: number,
 ) {
-  const ITEMS_PER_PAGE = 6;
+  const ITEMS_PER_PAGE = 10;
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   noStore();
   try {
@@ -267,6 +267,7 @@ export async function fetchFilteredCustomers(
       customers.gender,
       customers.poin
       FROM customers
+    WHERE name ILIKE ${`%${query}%`} OR phone::text ILIKE ${`%${query}%`}
 		GROUP BY customers.id, customers.name, customers.phone, customers.gender, customers.image_url
 		ORDER BY customers.name ASC
     LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
@@ -337,7 +338,7 @@ export async function fetchFilteredPegawai(
   query: string,
   currentPage: number,
 ) {
-  const ITEMS_PER_PAGE = 6;
+  const ITEMS_PER_PAGE = 10;
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   noStore();
   try {
@@ -349,8 +350,9 @@ export async function fetchFilteredPegawai(
       pegawai.gender,
       pegawai.email,
       pegawai.password 
-      FROM pegawai
-		GROUP BY pegawai.id, pegawai.name, pegawai.phone, pegawai.gender,  pegawai.email, pegawai.password 
+    FROM pegawai
+    WHERE name ILIKE ${`%${query}%`} OR phone::text ILIKE ${`%${query}%`}
+    GROUP BY pegawai.id, pegawai.name, pegawai.phone
 		ORDER BY pegawai.name ASC
     LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
 	  `;
@@ -371,19 +373,19 @@ export async function fetchPegawaiById(id: string) {
   try {
     const data = await sql<PegawaiForm>`
       SELECT
-        pegawai.id,
-        pegawai.name,
-        pegawai.phone,
-        pegawai.gender,
+        id,
+        name,
+        phone,
+        gender,
+        email, 
+        password
       FROM pegawai
-      WHERE pegawai.id = ${id};
+      WHERE id = ${id};
     `;
  
-    const pegawai = data.rows.map((pegawai) => ({
-      ...pegawai,
-    }));
+    const pegawai = data.rows[0];
     console.log(pegawai);
-    return pegawai[0];
+    return pegawai;
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch pegawai.');
@@ -413,7 +415,7 @@ export async function fetchFilteredDistributors(
   query: string,
   currentPage: number,
 ) {
-  const ITEMS_PER_PAGE = 6;
+  const ITEMS_PER_PAGE = 10;
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   noStore();
   try {
@@ -423,6 +425,7 @@ export async function fetchFilteredDistributors(
         distributors.name,
         distributors.phone
       FROM distributors
+      WHERE name ILIKE ${`%${query}%`} OR phone::text ILIKE ${`%${query}%`}
       GROUP BY distributors.id, distributors.name, distributors.phone
       ORDER BY distributors.name ASC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
@@ -474,11 +477,9 @@ export async function fetchDistributorById(id: string) {
       WHERE distributors.id = ${id};
     `;
  
-    const distributors = data.rows.map((distributor) => ({
-      ...distributor,
-    }));
+    const distributors = data.rows[0];
     console.log(distributors);
-    return distributors[0];
+    return distributors;
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch distributor.');
@@ -511,11 +512,11 @@ export async function fetchFilteredProducts(
   query: string,
   currentPage: number,
 ) {
-  const ITEMS_PER_PAGE = 10; // Define or import ITEMS_PER_PAGE
+  const ITEMS_PER_PAGE = 11; // Define or import ITEMS_PER_PAGE
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-  
+  noStore();
   try {
-    const products = await sql<ProductsTableType>`
+    const data = await sql<ProductsTableType>`
       SELECT
         products.id,
         products.name,
@@ -523,17 +524,20 @@ export async function fetchFilteredProducts(
         products.image_url,
         products.price
       FROM products
-      WHERE
-        products.name ILIKE ${`%${query}%`} OR
-        products.price::text ILIKE ${`%${query}%`}
+      WHERE name ILIKE ${`%${query}%`} OR stock ::text ILIKE ${`%${query}%`}
+      GROUP BY products.id, products.name, products.stock
       ORDER BY products.name ASC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
 
-    return products.rows;
+    const products = data.rows.map((products) => ({
+      ...products,
+    }));
+
+    return products;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch products.');
+    throw new Error('Failed to fetch products table.');
   }
 }
  
@@ -558,7 +562,7 @@ export async function fetchProductsPages(query: string) {
 export async function fetchProductsById(id: string) {
   noStore();
   try {
-    const data = await sql<ProductForm[]>`
+    const data = await sql<ProductForm>`
       SELECT
         id,
         name,

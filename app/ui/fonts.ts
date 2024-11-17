@@ -1,21 +1,15 @@
-import { Oswald, Roboto, Lusitana, Kanit } from 'next/font/google';
+export const oswald = {
+    variable: '--font-oswald',
+};
 
-export const oswald = Oswald({
-    weight: ['700'],
-    subsets: ['latin'] 
-});
+export const roboto = {
+    variable: '--font-roboto',
+};
 
-export const roboto = Roboto({
-    weight: ['400'],
-    subsets: ['latin'] 
-});   
+export const lusitana = {
+    variable: '--font-lusitana',
+};
 
-export const lusitana = Lusitana({
-    weight: ['400'],
-    subsets: ['latin'] 
-});  
-
-export const kanit = Kanit({
-    weight: ['400'],
-    subsets: ['latin'] 
-});  
+export const kanit = {
+    variable: '--font-kanit',
+};

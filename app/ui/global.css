@@ -2,6 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Oswald';
+  src: url('../../public/fonts/Oswald.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('../../public/fonts/Roboto.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Lusitana';
+  src: url('../../public/fonts/Lusitana.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('../../public/fonts/Kanit.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* CSS Variables */
+:root {
+  --font-oswald: 'Oswald', sans-serif;
+  --font-roboto: 'Roboto', sans-serif;
+  --font-lusitana: 'Lusitana', serif;
+  --font-kanit: 'Kanit', sans-serif;
+}
+
+
 input[type='number'] {
   -moz-appearance: textfield;
   appearance: textfield;

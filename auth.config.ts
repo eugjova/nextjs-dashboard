@@ -1,6 +1,7 @@
 import type { NextAuthConfig } from 'next-auth';
  
 export const authConfig = {
+  secret: process.env.NEXTAUTH_SECRET, // Gunakan secret dari environment variable
   pages: {
     signIn: '/login',
   },

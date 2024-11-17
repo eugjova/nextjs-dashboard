@@ -8,30 +8,53 @@ import {
 } from '@heroicons/react/24/outline';
 import { ArrowRightCircleIcon } from '@heroicons/react/20/solid';
 import { Button } from './button';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useState } from 'react';
 import { authenticate } from '../lib/action';
 
 export default function LoginForm() {
-  const [errorMessage, dispatch] = useFormState(authenticate, undefined);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  async function dispatch(formData: FormData) {
+    try {
+      setPending(true);
+      const errorMessage = await authenticate(undefined, formData);
+      if (errorMessage) {
+        setErrorMessage(errorMessage); // Set error message jika ada
+      } else {
+        setErrorMessage(null); // Reset error message jika berhasil
+      }
+    } catch (error: any) {
+      setErrorMessage('an unexpected error ocurred.');
+    } finally {
+      setPending(false);
+    }
+  }
 
   return (
-    <form action={dispatch} className="space-y-3">
+    <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          const formData = new FormData(event.currentTarget);
+          dispatch(formData);
+        }}
+        className="space-y-3"
+      >
       <div className="flex-1 rounded-lg bg-purple-700 bg-opacity-0 px-6 pb-4 pt-8">
-
-        <h1 className={`${oswald.className} mb-3 text-xl`}>
+        <h1 className={`${oswald.variable} mb-3 text-xl`}>
           Please log in to continue.
         </h1>
         <div className="w-full">
           <div>
             <label
-              className={`${oswald.className} mb-3 mt-5 block text-xs font-medium text-black`}
+              className={`${oswald.variable} mb-3 mt-5 block text-xs font-medium text-black`}
               htmlFor="email"
             >
               Email
             </label>
             <div className="relative">
               <input
-                className={`${roboto.className} peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-black text-sm outline-2 placeholder:text-gray-500`}
+                className={`${roboto.variable} peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-black text-sm outline-2 placeholder:text-gray-500`}
                 id="email"
                 type="email"
                 name="email"
@@ -43,14 +66,14 @@ export default function LoginForm() {
           </div>
           <div className="mt-4">
             <label
-              className={`${oswald.className} mb-3 mt-5 block text-xs font-medium text-black`}
+              className={`${oswald.variable} mb-3 mt-5 block text-xs font-medium text-black`}
               htmlFor="password"
             >
               Password
             </label>
             <div className="relative">
               <input
-                className={`${roboto.className} peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-black text-sm outline-2 placeholder:text-gray-500`}
+                className={`${roboto.variable} peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-black text-sm outline-2 placeholder:text-gray-500`}
                 id="password"
                 type="password"
                 name="password"
@@ -62,7 +85,7 @@ export default function LoginForm() {
             </div>
           </div>
         </div>
-        <LoginButton />
+        <LoginButton pending={pending} />
         <div
           className="flex h-8 items-end space-x-1"
           aria-live="polite"
@@ -80,9 +103,7 @@ export default function LoginForm() {
   );
 }
 
-function LoginButton() {
-  const { pending } = useFormStatus();
-
+function LoginButton({ pending }: { pending: boolean }) {
   return (
     <Button className="mt-4 w-full" aria-disabled={pending}>
       Log in <ArrowRightCircleIcon className="ml-auto h-5 w-5 text-gray-50" />

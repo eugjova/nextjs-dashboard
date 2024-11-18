@@ -87,7 +87,7 @@ export default function SideNav() {
                 <Bars3Icon className="w-5 h-5" />
               </button>
               <div className="text-[2rem] leading-[3rem] tracking-tight text-black">
-                <div className={`${oswald.className} flex items-center ml-2`}>
+                <div className={`${oswald.variable} flex items-center ml-2`}>
                   <Image
                     src="/Logo-SIBROMEN.png"
                     alt="logo FV"
@@ -105,18 +105,18 @@ export default function SideNav() {
               {languageDropdownOpen && (
                 <div className="absolute top-16 right-10 bg-black rounded-lg shadow-md p-2 border border-purple-900">
                   <ul>
-                    <li className={`${roboto.className} flex items-center space-x-2 text-sm p-2 hover:bg-gray-800 hover:text-purple-500 cursor-pointer`}>
+                    <li className={`${roboto.variable} flex items-center space-x-2 text-sm p-2 hover:bg-gray-800 hover:text-purple-500 cursor-pointer`}>
                       {IndonesiaIcon}
                       <p className="text-[12px] ml-1">Bahasa Indonesia</p>
                     </li>
-                    <li className={`${roboto.className} flex items-center space-x-2 text-sm p-2 hover:bg-gray-800 hover:text-purple-500 cursor-pointer`}>
+                    <li className={`${roboto.variable} flex items-center space-x-2 text-sm p-2 hover:bg-gray-800 hover:text-purple-500 cursor-pointer`}>
                       {EnglishIcon}
                       <p className="text-[12px] ml-1">English</p>
                     </li>
                   </ul>
                 </div>
               )}
-              <div className={`${oswald.className} flex items-center ml-2 cursor-pointer`} onClick={toggleUserDropdown}>
+              <div className={`${oswald.variable} flex items-center ml-2 cursor-pointer`} onClick={toggleUserDropdown}>
                 <UserCircleIcon className='w-10' />
                 <p className="text-[18px] text-bold p-0 ml-1">User</p>
                 <ChevronDownIcon className='w-5 ml-2 hover:text-purple-600' />
@@ -124,10 +124,10 @@ export default function SideNav() {
               {userDropdownOpen && (
                 <div className="absolute top-16 right-2 bg-black rounded-lg shadow-md p-2 border border-purple-900">
                   <ul>
-                    <div className={`${roboto.className} text-sm p-2 hover:bg-white-800 hover:text-purple-500 cursor-pointer`}>Information</div>
-                    <div className={`${roboto.className} text-sm p-2 hover:bg-gray-800 hover:text-purple-500 cursor-pointer`}>Settings</div>
+                    <div className={`${roboto.variable} text-sm p-2 hover:bg-white-800 hover:text-purple-500 cursor-pointer`}>Information</div>
+                    <div className={`${roboto.variable} text-sm p-2 hover:bg-gray-800 hover:text-purple-500 cursor-pointer`}>Settings</div>
                     <div
-                      className={`${roboto.className} text-sm p-2 hover:bg-gray-800 hover:text-purple-500 cursor-pointer`}
+                      className={`${roboto.variable} text-sm p-2 hover:bg-gray-800 hover:text-purple-500 cursor-pointer`}
                       onClick={handleSignOut}
                     >
                       Sign Out

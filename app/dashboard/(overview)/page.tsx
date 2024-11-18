@@ -21,7 +21,7 @@
 
 //   return (
 //     <main>
-//       <h1 className={`${oswald.className} text-xl md:text-2xl text-white mb-2 ml-2`}>
+//       <h1 className={`${oswald.variable} text-xl md:text-2xl text-white mb-2 ml-2`}>
 //         Dashboard
 //       </h1>
 //       {/* <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

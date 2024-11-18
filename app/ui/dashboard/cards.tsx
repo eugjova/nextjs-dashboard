@@ -52,7 +52,7 @@ export function Card({
       <div className="flex justify-between items-center space-x-4">
         <div>
           <div className="text-gray-400">{title}</div>
-          <div className={`${oswald.className} text-2xl font-bold text-white`}>{value}</div>
+          <div className={`${oswald.variable} text-2xl font-bold text-white`}>{value}</div>
         </div>
         <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-900 text-gray-400">
           {Icon && <Icon className="h-8 w-8" />}

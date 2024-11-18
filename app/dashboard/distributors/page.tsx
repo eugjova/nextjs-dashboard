@@ -32,7 +32,7 @@ export default async function Page(
   await new Promise((resolve) => setTimeout(resolve, 3000));
   return (
     <div className="flex min-h-screen flex-col">
-         <p className={`${oswald.className} text-3xl text-white`}>Distributor Page</p>
+         <p className={`${oswald.variable} text-3xl text-white`}>Distributor Page</p>
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
         <Suspense fallback={<SearchSkeleton />}>
           <Search placeholder="Search distributor..." />

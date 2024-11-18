@@ -4,7 +4,7 @@ import { oswald } from '@/app/ui/fonts';
 export default function Logo() {
   return (
     <div
-      className={`${oswald.className} flex flex-row items-center leading-none text-black`}
+      className={`${oswald.variable} flex flex-row items-center leading-none text-black`}
     >
       <Image
       src="/Logo-SIBROMEN.png" 

@@ -38,7 +38,7 @@ export default async function Page({
  
   return (
     <div className="flex min-h-screen flex-col">
-      <p className={`${oswald.className} text-3xl text-white`}>Penjualan Page</p>
+      <p className={`${oswald.variable} text-3xl text-white`}>Penjualan Page</p>
     <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
       <Suspense fallback={<SearchSkeleton />}>
         <Search placeholder="Search..." />

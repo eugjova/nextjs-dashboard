@@ -12,7 +12,7 @@ export default async function Customers()
         <div className="flex w-full flex-col md:col-span-4">
             <div className="flex grow flex-col justify-between rounded-xl bg-gray-950 p-4">
                 {/* NOTE: comment in this code when you get to this point in the course */}
-                <h2 className={`${oswald.className} text-white mb-4 text-xl md:text-2xl`}>
+                <h2 className={`${oswald.variable} text-white mb-4 text-xl md:text-2xl`}>
                     Customers
                 </h2>
                 <div className="bg-black px-6">

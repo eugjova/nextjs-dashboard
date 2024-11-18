@@ -18,20 +18,20 @@ export default function LoginForm() {
     <form action={dispatch} className="space-y-3">
       <div className="flex-1 rounded-lg bg-purple-700 bg-opacity-0 px-6 pb-4 pt-8">
 
-        <h1 className={`${oswald.className} mb-3 text-xl`}>
+        <h1 className={`${oswald.variable} mb-3 text-xl`}>
           Please log in to continue.
         </h1>
         <div className="w-full">
           <div>
             <label
-              className={`${oswald.className} mb-3 mt-5 block text-xs font-medium text-black`}
+              className={`${oswald.variable} mb-3 mt-5 block text-xs font-medium text-black`}
               htmlFor="email"
             >
               Email
             </label>
             <div className="relative">
               <input
-                className={`${roboto.className} peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-black text-sm outline-2 placeholder:text-gray-500`}
+                className={`${roboto.variable} peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-black text-sm outline-2 placeholder:text-gray-500`}
                 id="email"
                 type="email"
                 name="email"
@@ -43,14 +43,14 @@ export default function LoginForm() {
           </div>
           <div className="mt-4">
             <label
-              className={`${oswald.className} mb-3 mt-5 block text-xs font-medium text-black`}
+              className={`${oswald.variable} mb-3 mt-5 block text-xs font-medium text-black`}
               htmlFor="password"
             >
               Password
             </label>
             <div className="relative">
               <input
-                className={`${roboto.className} peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-black text-sm outline-2 placeholder:text-gray-500`}
+                className={`${roboto.variable} peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-black text-sm outline-2 placeholder:text-gray-500`}
                 id="password"
                 type="password"
                 name="password"

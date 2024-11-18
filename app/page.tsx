@@ -33,7 +33,7 @@ export default function Page() {
         <nav className="fixed inset-x-0 top-0 z-50 w-full bg-black/80 shadow-lg px-4 py-2 transition duration-700 ease-out">
           <div className="flex justify-between p-1">
             <div className="text-[2rem] leading-[3rem] tracking-tight text-white">
-              <div className={`${oswald.className} flex items-center`}>
+              <div className={`${oswald.variable} flex items-center`}>
                 <Image
                   src="/Logo-SIBROMEN.png"
                   alt="logo SIBROMEN"
@@ -84,7 +84,7 @@ export default function Page() {
           </div>
         </div>
         <div className="flex flex-col items-center justify-center h-screen gap-3 bg-gray-50/0 px-0 py-2 md:w-2/5 text-right ">
-          <p className={`${oswald.className} text-[120px] font-bold text-white leading-none md:leading-normal `}>
+          <p className={`${oswald.variable} text-[120px] font-bold text-white leading-none md:leading-normal `}>
            SIBROMEN
           </p>
           <div className="flex flex-row items-center text-white justify-end relative">
@@ -99,7 +99,7 @@ export default function Page() {
               href="/dashboard"
               className="flex items-center px-8 py-3 text-xl text-white transition duration-700 ease-out bg-gradient-to-r from-red-700 to-red-400 rounded-full hover:from-red-900 hover:to-red-600 hidden md:inline-flex"
             >
-              <span className={`${roboto.className} font-bold hidden md:block mr-2`}>Dashboard</span>
+              <span className={`${roboto.variable} font-bold hidden md:block mr-2`}>Dashboard</span>
               <ArrowRightCircleIcon className="w-6" />
             </Link>
           </div>
@@ -109,11 +109,11 @@ export default function Page() {
 
       <div id="about" className="mt-32 px-16 relative flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
         <div className="flex flex-col justify-center gap-6 rounded-lg bg-gray-50/0 px-6 py-4 md:w-2/5">
-          <p className={`${oswald.className} mt-16 text-[32px] font-bold text-black md:leading-normal`}>
+          <p className={`${oswald.variable} mt-16 text-[32px] font-bold text-black md:leading-normal`}>
             About Us
           </p>
-          <div className={`${oswald.className} flex flex-row items-center leading-none text-black`}>
-            <p className={`${roboto.className} text-[21px] text-black-800 md:leading-normal`}>
+          <div className={`${oswald.variable} flex flex-row items-center leading-none text-black`}>
+            <p className={`${roboto.variable} text-[21px] text-black-800 md:leading-normal`}>
             At Saburo Ramen, we bring you the authentic taste of Kyoto with every bowl. Inspired by traditional Japanese flavors, we craft our ramen using fresh ingredients, rich broths, and handmade noodles. Our goal is to offer a truly memorable dining experience, making us The Best Kyoto Ramen In Town.
             Come and taste the warmth and soul of Kyoto, only at Saburo Ramen!
             </p>
@@ -134,10 +134,10 @@ export default function Page() {
 
       <footer id="contact" className="mt-48 px-16 py-4 bg-red-600/80 shadow-lg rounded-t-lg ">
         <div className="flex flex-col justify-center gap-2 rounded-lg bg-gray-50/0 px-0 py-4 w-full md:px-50">
-          <p className={`${oswald.className} text-[24px] font-bold text-white md:leading-normal`}>
+          <p className={`${oswald.variable} text-[24px] font-bold text-white md:leading-normal`}>
             Contact Us
           </p>
-          <div className={`${roboto.className} flex flex-col leading-none text-white space-y-2`}>
+          <div className={`${roboto.variable} flex flex-col leading-none text-white space-y-2`}>
             <p className="text-[14px] text-white-800 md:leading-normal">
               Get in touch with us for any inquiries or support.
             </p>

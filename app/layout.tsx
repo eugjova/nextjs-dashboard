@@ -4,7 +4,7 @@ import { Metadata } from 'next';
  
 export const metadata: Metadata = {
   title: {
-    template: '%s | Flavouré Vape',
+    template: '%s | SIBROMEN',
     default: 'Dashboard',
   },
   description: 'The official Next.js Learn Dashboard built with App Router.',

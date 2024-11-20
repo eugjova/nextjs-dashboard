@@ -23,7 +23,8 @@ import {
 import { unstable_noStore as noStore } from 'next/cache';
 import { formatCurrency } from './utils';
 
-import { products, } from './placeholder-data';
+import { distributors, penjualan, products, } from './placeholder-data';
+import { error } from 'console';
 
 
 export async function fetchRevenue() {
@@ -117,36 +118,33 @@ export async function fetchFilteredPenjualan(
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    const invoices = await sql<PenjualanTable>`
+    const data = await sql<PenjualanTable>`
       SELECT
-        invoices.id,
-        invoices.id_pegawai,
-        invoices.costumerId,
-        invoices.id_produk,
-        invoices.jumlah,
-        customers.total,
-        customers.poin,
-        customers.date,
-        products.name AS product_name
+        penjualan.id,
+        penjualan.id_pegawai,
+        penjualan.costumerId,
+        penjualan.id_produk,
+        penjualan.jumlah,
+        penjualan.total,
+        penjualan.poin,
+        penjualan.date
       FROM invoices
-      JOIN customers ON invoices.customer_id = customers.id
-      JOIN products ON invoices.product_id = products.id
       WHERE
-        customers.name ILIKE ${`%${query}%`} OR
-        customers.email ILIKE ${`%${query}%`} OR
-        invoices.amount::text ILIKE ${`%${query}%`} OR
-        invoices.quantity::text ILIKE ${`%${query}%`} OR
-        invoices.date::text ILIKE ${`%${query}%`} OR
-        invoices.status ILIKE ${`%${query}%`} OR
-        products.name ILIKE ${`%${query}%`}
-      ORDER BY invoices.date DESC
+        penjualan.jumlah::text ILIKE ${`%${query}%`} OR
+        penjualan.total::text ILIKE ${`%${query}%`} OR
+        penjualan.poin::text ILIKE ${`%${query}%`} OR
+        penjualan.date ILIKE ${`%${query}%`} 
+      ORDER BY penjualan.date DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
 
-    return invoices.rows;
+    const penjualan = data.rows.map((penjualan) => ({
+      ...penjualan,
+    }));
+    return penjualan;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch invoices.');
+    throw new Error('Failed to fetch penjualan.');
   }
 }
 
@@ -204,13 +202,7 @@ export async function fetchCustomers() {
     const data = await sql<CustomerField>`
       SELECT
         id,
-        name,
-        phone,
-        createdAt,
-        updatedAt,
-        gender,
-        poin,
-        image_url
+        name
       FROM customers
       ORDER BY name ASC
     `;
@@ -234,8 +226,7 @@ export async function fetchLatestCustomers() {
         createdAt,
         updatedAt,
         gender,
-        poin,
-        image_url
+        poin
       FROM customers
       ORDER BY name ASC`;
 

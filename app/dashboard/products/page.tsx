@@ -36,7 +36,7 @@ export default async function Page({
           <Search placeholder="Search products..." />
         </Suspense>
         <Suspense fallback={<CreateSkeleton />}>
-      <Form />
+      <Form products={[]} />
       </Suspense>
       </div>
 

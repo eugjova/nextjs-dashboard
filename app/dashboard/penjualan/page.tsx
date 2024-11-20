@@ -1,15 +1,14 @@
 import Pagination from '@/app/ui/penjualan/pagination';
 import Search from '@/app/ui/search';
 import Table from '@/app/ui/penjualan/table';
-import { CreateInvoice } from '@/app/ui/penjualan/buttons';
 import { oswald } from '@/app/ui/fonts';
 import { Suspense } from 'react';
-// import { 
-//   fetchPenjualanPages, 
-//   fetchCustomers, 
-//   fetchProducts, 
+import { 
+  fetchPenjualanPages, 
+  fetchCustomers, 
+  fetchProducts, 
  
-// } from '@/app/lib/data';
+} from '@/app/lib/data';
 import {
   SearchSkeleton,
   InvoicesTableSkeleton,
@@ -17,6 +16,8 @@ import {
 } from '@/app/ui/skeletons'; 
 import { Metadata } from 'next';
 import Form from '@/app/ui/penjualan/create-form';
+import { CreatePenjualan } from '@/app/ui/penjualan/buttons';
+import { products } from '@/app/lib/placeholder-data';
 
 export const metadata: Metadata = {
   title: 'Penjualan',
@@ -44,14 +45,15 @@ export default async function Page({
         <Search placeholder="Search penjualan..." />
       </Suspense>
       <Suspense fallback={<CreateSkeleton />}>
-      {/* <Form customers={customers} products={products}/> */}
+      <Form products={products}/>
+      
       </Suspense>
     </div>
 
     <div className="mt flow-root">
-        <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
+        {/* <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}> */}
           <Table query={query} currentPage={currentPage} />
-        </Suspense>
+        {/* </Suspense> */}
       </div>
 
       <div className="mt-5 flex w-full justify-center">

@@ -1,22 +1,22 @@
 import Pagination from '@/app/ui/penjualan/pagination';
 import Search from '@/app/ui/search';
 import Table from '@/app/ui/pembelian/table';
-import { CreateInvoice } from '@/app/ui/penjualan/buttons';
 import { oswald } from '@/app/ui/fonts';
 import { Suspense } from 'react';
-// import { 
-//   fetchPenjualanPages, 
-//   fetchCustomers, 
-//   fetchProducts, 
+import { 
+  fetchPenjualanPages, 
+  fetchCustomers, 
+  fetchProducts, 
  
-// } from '@/app/lib/data';
+} from '@/app/lib/data';
 import {
   SearchSkeleton,
   InvoicesTableSkeleton,
   CreateSkeleton,
 } from '@/app/ui/skeletons'; 
 import { Metadata } from 'next';
-import Form from '@/app/ui/penjualan/create-form';
+import Form from '@/app/ui/pembelian/create-form';
+import { distributors, pegawai } from '@/app/lib/placeholder-data';
 
 export const metadata: Metadata = {
   title: 'Pembelian',
@@ -33,8 +33,8 @@ export default async function Page({
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
   // const totalPages = await fetchPenjualanPages(query);
-  // const customers = await fetchCustomers();
-  // const products = await fetchProducts();
+  const customers = await fetchCustomers();
+  const products = await fetchProducts();
  
   return (
     <div className="flex min-h-screen flex-col">
@@ -44,7 +44,7 @@ export default async function Page({
         <Search placeholder="Search Pembelian..." />
       </Suspense>
       <Suspense fallback={<CreateSkeleton />}>
-      {/* <Form customers={customers} products={products}/> */}
+      <Form pegawai={pegawai} distributors={distributors}/>
       </Suspense>
     </div>
 

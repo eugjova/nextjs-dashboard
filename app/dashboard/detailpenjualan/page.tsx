@@ -1,7 +1,6 @@
 import Pagination from '@/app/ui/penjualan/pagination';
 import Search from '@/app/ui/search';
 import Table from '@/app/ui/detailpenjualan/table';
-import { CreateInvoice } from '@/app/ui/penjualan/buttons';
 import { oswald } from '@/app/ui/fonts';
 import { Suspense } from 'react';
 // import { 

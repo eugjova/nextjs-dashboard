@@ -514,6 +514,7 @@ const pembelian = [
   {
     id: '90a3f2dc-a82f-4a18-8f1b-4d3e2eb9a2e4',
     id_pegawai : pegawai[0].name,
+    id_distributor : distributors[0].name,
     jumlah: 50,
     total: 2000000,
     date: '2023-01-11',
@@ -521,6 +522,7 @@ const pembelian = [
   {
     id: 'e1d4f1ba-f3ac-4b2f-8d58-9e07c3e5c598',
     id_pegawai : pegawai[9].name,
+    id_distributor : distributors[1].name,
     jumlah: 30,
     total: 1200000,
     date: '2023-02-05',
@@ -528,6 +530,7 @@ const pembelian = [
   {
     id: 'bc6e7fdd-7e52-487d-b8b0-2ecf6d3e8a68',
     id_pegawai : pegawai[8].name,
+    id_distributor : distributors[2].name,
     jumlah: 40,
     total: 1600000,
     date: '2023-03-12',
@@ -535,6 +538,7 @@ const pembelian = [
   {
     id: '3cfe8271-324d-4ee0-9e09-bce5bf5a9c53',
     id_pegawai : pegawai[7].name,
+    id_distributor : distributors[3].name,
     jumlah: 25,
     total: 1000000,
     date: '2023-04-09',
@@ -542,6 +546,7 @@ const pembelian = [
   {
     id: '7654fdbc-3a3f-49af-b2b9-5a98f6e6d5e4',
     id_pegawai : pegawai[6].name,
+    id_distributor : distributors[4].name,
     jumlah: 60,
     total: 2400000,
     date: '2023-05-17',
@@ -549,6 +554,7 @@ const pembelian = [
   {
     id: 'a0b5d7e2-df4b-4cb1-9c97-e567f75f3e02',
     id_pegawai : pegawai[5].name,
+    id_distributor : distributors[5].name,
     jumlah: 35,
     total: 1400000,
     date: '2023-06-20',
@@ -556,6 +562,7 @@ const pembelian = [
   {
     id: 'b8c3e8a2-0d1f-45c5-9f6e-7a8a2d8e9c37',
     id_pegawai : pegawai[4].name,
+    id_distributor : distributors[6].name,
     jumlah: 45,
     total: 1800000,
     date: '2023-07-15',
@@ -563,6 +570,7 @@ const pembelian = [
   {
     id: '46edc7e3-9d5f-4af7-b6c8-5e8c4a9d6f84',
     id_pegawai : pegawai[3].name,
+    id_distributor : distributors[7].name,
     jumlah: 20,
     total: 800000,
     date: '2023-08-18',
@@ -570,6 +578,7 @@ const pembelian = [
   {
     id: 'c4d5e6a7-8f2a-41e7-b9f8-7b2d6a7e8c5b',
     id_pegawai : pegawai[2].name,
+    id_distributor : distributors[8].name,
     jumlah: 55,
     total: 2200000,
     date: '2023-09-25',
@@ -577,12 +586,12 @@ const pembelian = [
   {
     id: '82e1f3c4-0a6b-42d1-9c5e-7f8b2a4c6e1d',
     id_pegawai : pegawai[1].name,
+    id_distributor : distributors[9].name,
     jumlah: 50,
     total: 2000000,
     date: '2023-10-10',
   }
 ]
- 
  
 const stock = [
   {

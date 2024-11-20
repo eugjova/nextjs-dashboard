@@ -1,9 +1,37 @@
-import Image from 'next/image';
-// import { UpdateInvoice, DeleteInvoice } from '@/app/ui/detailtransaksipembelian/buttons';
-// import InvoiceStatus from '@/app/ui/detailtransaksipembelian/status';
+'use client'; 
+
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { DetailTransaksiPembelian } from '@/app/lib/placeholder-data';
-// import { fetchFilteredPenjualan } from '@/app/lib/data';
+import * as XLSX from 'xlsx';
+import { fetchFilteredPenjualan } from '@/app/lib/data';
+
+type ExportExcelButtonProps = {
+  data: typeof DetailTransaksiPembelian; // Menggunakan tipe data DetailTransaksiPenjualan
+};
+
+const ExportExcelButton = ({ data }: ExportExcelButtonProps) => {
+  const handleExport = () => {
+    // Membuat worksheet dari data
+    const ws = XLSX.utils.json_to_sheet(data);
+
+    // Membuat workbook
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Data Pembelian');
+
+    // Menyimpan file Excel
+    XLSX.writeFile(wb, 'detailtransaksipembelian.xlsx');
+  };
+
+  return (
+     <button
+      onClick={handleExport}
+      className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+    >
+      Ekspor ke Excel
+    </button>
+  );
+};
+
 
 export default async function DetailPembelianTable({
   query,
@@ -13,48 +41,41 @@ export default async function DetailPembelianTable({
   currentPage: number;
 }) {
   // const detailtransaksipembelian = await fetchFilteredPenjualan(query, currentPage);
+  const data = DetailTransaksiPembelian;
 
   return (
-    // <div className="mt-6 flow-root">
-    //   <div className="inline-block min-w-full align-middle">
-    //     <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
-    //       <div className="md:hidden">
-    //         {detailtransaksipembelians?.map((detailtransaksipembelian) => (
-    //           <div
-    //             key={detailtransaksipembelian.id}
-    //             className="mb-2 w-full rounded-md bg-white p-4"
-    //           >
-    //             <div className="flex items-center justify-between border-b pb-4">
-    //               <div>
-    //                 <div className="mb-2 flex items-center">
-    //                   <Image
-    //                     src={detailtransaksipembelian.image_url}
-    //                     className="mr-2 rounded-full"
-    //                     width={28}
-    //                     height={28}
-    //                     alt={`${detailtransaksipembelian.name}'s profile picture`}
-    //                   />
-    //                   <p>{detailtransaksipembelian.name}</p>
-    //                 </div>
-    //                 <p className="text-sm text-gray-500">{detailtransaksipembelian.email}</p>
-    //               </div>
-    //               <InvoiceStatus status={detailtransaksipembelian.status} />
-    //             </div>
-    //             <div className="flex w-full items-center justify-between pt-4">
-    //               <div>
-    //                 <p className="text-xl font-medium">
-    //                   {formatCurrency(detailtransaksipembelian.amount)}
-    //                 </p>
-    //                 <p>{formatDateToLocal(detailtransaksipembelian.date)}</p>
-    //               </div>
-    //               <div className="flex justify-end gap-2">
-    //                 <UpdateInvoice id={detailtransaksipembelian.id} />
-    //                 <DeleteInvoice id={detailtransaksipembelian.id} />
-    //               </div>
-    //             </div>
-    //           </div>
-    //         ))}
-    //       </div>
+    <div className="mt-6 flow-root">
+      <ExportExcelButton data={data} />
+      <div className="inline-block min-w-full align-middle">
+        <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
+          <div className="md:hidden">
+            {DetailTransaksiPembelian?.map((detailtransaksipembelian) => (
+              <div
+                key={detailtransaksipembelian.id}
+                className="mb-2 w-full rounded-md bg-white p-4"
+              >
+                <div className="flex items-center justify-between border-b pb-4">
+                  <div>
+                    <div className="mb-2 flex items-center">
+                      <p>{detailtransaksipembelian.id_pembelian}</p>
+                    </div>
+                    <p className="text-sm text-gray-500">{detailtransaksipembelian.distributorId}</p>
+                  </div>
+                </div>
+                <div className="flex w-full items-center justify-between pt-4">
+                  <div>
+                  <p className="text-sm text-gray-500">{detailtransaksipembelian.id_jumlah}</p>
+                    <p className="text-xl font-medium">
+                      {formatCurrency(detailtransaksipembelian.id_total_biaya_transaksi)}
+                    </p>
+                    <p>{formatDateToLocal(detailtransaksipembelian.date)}</p>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
           <table className="hidden min-w-full text-gray-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
@@ -86,13 +107,6 @@ export default async function DetailPembelianTable({
                 >
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex items-center gap-3">
-                      {/* <Image
-                        src={detailtransaksipembelian.image_url}
-                        className="rounded-full"
-                        width={28}
-                        height={28}
-                        alt={`${detailtransaksipembelian.name}'s profile picture`}
-                      /> */}
                       <p>{detailtransaksipembelian.id_pembelian}</p>
                     </div>
                   </td>
@@ -118,8 +132,8 @@ export default async function DetailPembelianTable({
               ))}
             </tbody>
           </table>
-    //     </div>
-    //   </div>
-    // </div>
+         </div>
+       </div>
+     </div>
   );
 }

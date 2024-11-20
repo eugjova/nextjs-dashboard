@@ -13,7 +13,7 @@ import {
   KeyIcon
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
-import { createPegawai } from '@/app/lib/action';
+import { createDistributors, createPegawai } from '@/app/lib/action';
 import Breadcrumbs from '@/app/ui/distributors/breadcrumbs';
 import { useState } from 'react';
 import { distributors } from '@/app/lib/placeholder-data';
@@ -29,11 +29,16 @@ export default function Form() {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     try {
-      await createPegawai(formData);
+      await createDistributors(formData);
       setModal(false);
     } catch (error) {
       console.error('Failed to create distributors:', error);
     }
+  }
+
+  async function createDistributors(formData: FormData) {
+    console.log('FormData received:', Object.fromEntries(formData.entries()));
+    // Lakukan proses lainnya...
   }
 
   return (

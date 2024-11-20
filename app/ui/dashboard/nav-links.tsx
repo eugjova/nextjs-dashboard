@@ -19,7 +19,7 @@ const links = [
   { name: 'Pegawai', href: '/dashboard/pegawai', icon: UserGroupIcon },
   { name: 'Customers', href: '/dashboard/customers', icon: UserGroupIcon },
   { name: 'Distributor', href: '/dashboard/distributors', icon: UserGroupIcon },
-  { name: 'Penjualan', href: '/dashboard/invoices', icon: CreditCardIcon ,},
+  { name: 'Penjualan', href: '/dashboard/penjualan', icon: CreditCardIcon ,},
   { name: 'Pembelian', href: '/dashboard/pembelian', icon: CreditCardIcon ,},
   { name: 'Detail Transaksi Penjualan', href: '/dashboard/detailpenjualan', icon: DocumentDuplicateIcon },
   { name: 'Detail Transaksi Pembelian', href: '/dashboard/detailpembelian', icon: DocumentDuplicateIcon },

@@ -50,6 +50,25 @@ const FormSchemaPegawai = z.object({
   password: z.string(),
 });
 
+const FormSchemaPenjualan = z.object({
+  id: z.string(),
+  customerId: z.string(),
+  id_produk : z.string(),
+  id_pegawai : z.string(),
+  jumlah : z.coerce.number(),
+  total : z.coerce.number(),
+  poin: z.string(),
+  date: z.string(),
+});
+
+const FormSchemaPembelian = z.object({
+  id: z.string(),
+  id_pegawai : z.string(),
+  id_distributor : z.string(),
+  jumlah : z.coerce.number(),
+  total : z.coerce.number(),
+  date: z.string(),
+});
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
@@ -65,6 +84,10 @@ const UpdateCustomer = FormSchemaCustomer.omit({ id: true });
 
 const CreatePegawai = FormSchemaPegawai.omit({ id: true});
 const UpdatePegawai = FormSchemaPegawai.omit({ id: true });
+
+const CreatePenjualan = FormSchemaPenjualan.omit({ id: true});
+const CreatePembelian = FormSchemaPembelian.omit({ id: true});
+
 
 
 
@@ -323,49 +346,100 @@ export async function deleteDistributors(id: string) {
   }
 }
 
-export async function createInvoice(formData: FormData) {
-  const { customerId, productId, quantity, amount, status } = CreateInvoice.parse({
-    customerId: formData.get('customerId'),
-    productId: formData.get('productId'),
-    quantity: formData.get('quantity'),
-    amount: formData.get('amount'),
-    status: formData.get('status'),
+export async function createPenjualan(formData: FormData) {
+  // Retrieve values and check if any are null or undefined
+  const customerId = formData.get('customerId')?.toString() || '';
+  const id_produk = formData.get('id_produk')?.toString() || '';
+  const id_pegawai = formData.get('id_pegawai')?.toString() || '';
+  const jumlah = formData.get('jumlah');
+  const total = formData.get('total');
+  const poin = formData.get('poin')?.toString() || '';
+
+  // Check for missing required fields
+  if (!customerId || !id_produk || !id_pegawai || !jumlah || !total || !poin) {
+    return {
+      message: 'Validation Error: Missing required fields.',
+    };
+  }
+
+  // Proceed with validation using Zod
+  try {
+    const parsedData = CreatePenjualan.parse({
+      customerId,
+      id_produk,
+      id_pegawai,
+      jumlah: Number(jumlah),
+      total: Number(total),
+      poin,
+    });
+
+    await sql`
+      INSERT INTO invoices (customer_id, id_produk, id_pegawai, jumlah, total, poin)
+      VALUES (${parsedData.customerId}, ${parsedData.id_produk}, ${parsedData.id_pegawai}, ${parsedData.jumlah}, ${parsedData.total}, ${parsedData.poin})
+    `;
+
+    revalidatePath('/dashboard/penjualan');
+    redirect('/dashboard/penjualan');
+  } catch (error) {
+    console.error('Error:', error);
+    return { message: 'Database Error: Failed to create Penjualan record.' };
+  }
+}
+
+
+
+export async function createPembelian(formData: FormData) {
+  // Get form values
+  const id_pegawai = formData.get('id_pegawai');
+  const id_distributor = formData.get('id_distributor');
+  const jumlah = formData.get('jumlah');
+  const total = formData.get('total');
+  
+  // Ensure all required fields are provided
+  if (!id_pegawai || !id_distributor || !jumlah || !total) {
+    return {
+      message: 'Validation Error: Missing required fields.',
+    };
+  }
+
+  // Parse the form data with validation
+  const parsedData = CreatePembelian.safeParse({
+    id_pegawai: id_pegawai.toString(),   // Ensure it's a string
+    id_distributor: id_distributor.toString(), // Ensure it's a string
+    jumlah: Number(jumlah),  // Convert jumlah to number
+    total: Number(total),    // Convert total to number
   });
 
-  const date = new Date().toISOString().split('T')[0];
+  // If validation fails, return error details
+  if (!parsedData.success) {
+    return {
+      message: 'Validation Error: Invalid input data.',
+      errorDetails: parsedData.error.errors,
+    };
+  }
 
-  await sql`
-    INSERT INTO invoices (customer_id, product_id, quantity, amount, status, date)
-    VALUES (${customerId}, ${productId}, ${quantity}, ${amount}, ${status}, ${date})
-  `;
+  // Set the date field if not provided
+  const date = new Date().toISOString().split('T')[0];  // Get current date in YYYY-MM-DD format
 
-  revalidatePath('/dashboard/invoices');
-  redirect('/dashboard/invoices');
+  // Insert into database
+  try {
+    await sql`
+      INSERT INTO pembelian (id_pegawai, id_distributor, jumlah, total, date)
+      VALUES (${parsedData.data.id_pegawai}, ${parsedData.data.id_distributor}, ${parsedData.data.jumlah}, ${parsedData.data.total}, ${date})
+    `;
+  } catch (error) {
+    console.error('Database error:', error);
+    return {
+      message: 'Database Error: Failed to create Pembelian record.',
+    };
+  }
+
+  // Revalidate path and redirect
+  revalidatePath('/dashboard/pembelian');
+  redirect('/dashboard/pembelian');
 }
 
-export async function updateInvoice(id: string, formData: FormData) {
-  const { customerId, productId, quantity, amount, status } = UpdateInvoice.parse({
-    customerId: formData.get('customerId'),
-    productId: formData.get('productId'),
-    quantity: formData.get('quantity'),
-    amount: formData.get('amount'),
-    status: formData.get('status'),
-  });
- 
-  await sql`
-    UPDATE invoices
-    SET customer_id = ${customerId}, product_id = ${productId}, quantity = ${quantity}, amount = ${amount}, status = ${status}
-    WHERE id = ${id}
-  `;
- 
-  revalidatePath('/dashboard/invoices');
-  redirect('/dashboard/invoices');
-}
 
-export async function deleteInvoice(id: string) {
-  await sql`DELETE FROM invoices WHERE id = ${id}`;
-  revalidatePath('/dashboard/invoices');
-}
 
 export async function createProduct(formData: FormData) {
   const img = formData.get('image');
@@ -469,41 +543,3 @@ export async function authenticate(
     throw error;
   }
 }
-
-// export async function createService(formData: FormData) {
-//   const { name, price, estimation } = CreateService.parse({
-//     name: formData.get('name'),
-//     price: formData.get('price'),
-//     estimation: formData.get('estimation'),
-//   });
-
-//   await sql`
-//     INSERT INTO services (name, price, estimation)
-//     VALUES (${name}, ${price}, ${estimation})
-//   `;
-
-//   revalidatePath('/dashboard/services');
-//   redirect('/dashboard/services');
-// }
-
-// export async function updateService(id: string, formData: FormData) {
-//   const { name, price, estimation } = UpdateService.parse({
-//     name: formData.get('name'),
-//     price: formData.get('price'),
-//     estimation: formData.get('estimation'),
-//   });
- 
-//   await sql`
-//   UPDATE services
-//   SET name = ${name}, price = ${price}, estimation = ${estimation}
-//   WHERE id = ${id}
-// `;
-
-// revalidatePath('/dashboard/services');
-// redirect('/dashboard/services');
-// }
-
-// export async function deleteService(id: string) {
-//   await sql`DELETE FROM services WHERE id = ${id}`;
-//   revalidatePath('/dashboard/services');
-// }

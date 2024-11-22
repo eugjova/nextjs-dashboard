@@ -107,13 +107,9 @@ export async function fetchCardData() {
   }
 }
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 10;
 
-export async function fetchFilteredPenjualan(
-  query: string,
-  currentPage: number,
-) {
-  
+export async function fetchFilteredPenjualan(query: string, currentPage: number) {
   noStore();
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
@@ -121,27 +117,27 @@ export async function fetchFilteredPenjualan(
     const data = await sql<PenjualanTable>`
       SELECT
         penjualan.id,
-        penjualan.id_pegawai,
-        penjualan.costumerId,
-        penjualan.id_produk,
+        penjualan.date,
+        products.name as nama_produk,
+        customers.name as nama_customer,
+        pegawai.name as nama_pegawai,
         penjualan.jumlah,
         penjualan.total,
-        penjualan.poin,
-        penjualan.date
-      FROM invoices
+        penjualan.total_bayar,
+        penjualan.poin
+      FROM penjualan
+      JOIN products ON penjualan.id_produk = products.id
+      JOIN customers ON penjualan.customerId = customers.id
+      JOIN pegawai ON penjualan.id_pegawai = pegawai.id
       WHERE
-        penjualan.jumlah::text ILIKE ${`%${query}%`} OR
-        penjualan.total::text ILIKE ${`%${query}%`} OR
-        penjualan.poin::text ILIKE ${`%${query}%`} OR
-        penjualan.date ILIKE ${`%${query}%`} 
+        products.name ILIKE ${`%${query}%`} OR
+        customers.name ILIKE ${`%${query}%`} OR
+        pegawai.name ILIKE ${`%${query}%`}
       ORDER BY penjualan.date DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
 
-    const penjualan = data.rows.map((penjualan) => ({
-      ...penjualan,
-    }));
-    return penjualan;
+    return data.rows;
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch penjualan.');
@@ -151,22 +147,23 @@ export async function fetchFilteredPenjualan(
 export async function fetchPenjualanPages(query: string) {
   noStore();
   try {
-    const count = await sql`SELECT COUNT(*)
-    FROM invoices
-    JOIN customers ON invoices.customer_id = customers.id
-    WHERE
-      customers.name ILIKE ${`%${query}%`} OR
-      customers.email ILIKE ${`%${query}%`} OR
-      invoices.amount::text ILIKE ${`%${query}%`} OR
-      invoices.date::text ILIKE ${`%${query}%`} OR
-      invoices.status ILIKE ${`%${query}%`}
-  `;
+    const count = await sql`
+      SELECT COUNT(*)
+      FROM penjualan
+      JOIN products ON penjualan.id_produk = products.id
+      JOIN customers ON penjualan.customerId = customers.id
+      JOIN pegawai ON penjualan.id_pegawai = pegawai.id
+      WHERE
+        products.name ILIKE ${`%${query}%`} OR
+        customers.name ILIKE ${`%${query}%`} OR
+        pegawai.name ILIKE ${`%${query}%`}
+    `;
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
     return totalPages;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch total number of invoices.');
+    throw new Error('Failed to fetch total number of penjualan.');
   }
 }
 
@@ -202,7 +199,8 @@ export async function fetchCustomers() {
     const data = await sql<CustomerField>`
       SELECT
         id,
-        name
+        name,
+        poin
       FROM customers
       ORDER BY name ASC
     `;

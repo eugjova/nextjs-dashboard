@@ -3,12 +3,6 @@ import Search from '@/app/ui/search';
 import Table from '@/app/ui/detailpenjualan/table';
 import { oswald } from '@/app/ui/fonts';
 import { Suspense } from 'react';
-// import { 
-//   fetchPenjualanPages, 
-//   fetchCustomers, 
-//   fetchProducts, 
- 
-// } from '@/app/lib/data';
 import {
   SearchSkeleton,
   InvoicesTableSkeleton,
@@ -29,25 +23,23 @@ export default async function Page({
     page?: string;
   };
 }) {
-  const query = searchParams?.query || '';
-  const currentPage = Number(searchParams?.page) || 1;
-  // const totalPages = await fetchPenjualanPages(query);
-  // const customers = await fetchCustomers();
-  // const products = await fetchProducts();
- 
+  const params = await Promise.resolve(searchParams);
+  const query = params?.query || '';
+  const currentPage = Number(params?.page) || 1;
+
   return (
     <div className="flex min-h-screen flex-col">
       <p className={`${oswald.variable} text-3xl text-white`}>Penjualan Page</p>
-    <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-      <Suspense fallback={<SearchSkeleton />}>
-        <Search placeholder="Search invoices..." />
-      </Suspense>
-      <Suspense fallback={<CreateSkeleton />}>
-      {/* <Form customers={customers} products={products}/> */}
-      </Suspense>
-    </div>
+      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
+        <Suspense fallback={<SearchSkeleton />}>
+          <Search placeholder="Search invoices..." />
+        </Suspense>
+        <Suspense fallback={<CreateSkeleton />}>
+          {/* <Form customers={customers} products={products}/> */}
+        </Suspense>
+      </div>
 
-    <div className="mt flow-root">
+      <div className="mt flow-root">
         <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
           <Table query={query} currentPage={currentPage} />
         </Suspense>

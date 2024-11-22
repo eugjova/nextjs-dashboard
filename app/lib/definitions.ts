@@ -1,80 +1,58 @@
-// This file contains type definitions for your data.
-// It describes the shape of the data, and what data type each property should accept.
-// For simplicity of teaching, we're manually defining these types.
+export type PenjualanTable = {
+  id: string;
+  date: string;
+  nama_produk: string;
+  nama_customer: string;
+  nama_pegawai: string;
+  jumlah: number;
+  total: number;
+  total_bayar: number;
+  poin: number;
+};
 
-import { string } from "zod";
+export type DetailTransaksiPenjualanTable = {
+  id: string;
+  id_penjualan: string;
+  id_produk: string;
+  jumlah: number;
+  harga: number;
+  date: string;
+};
 
-// However, these types are generated automatically if you're using an ORM such as Prisma.
-export type Roles = {
-  password(password: string, password1: any): unknown;
+export type DetailTransaksiPembelianTable = {
+  id: string;
+  id_pembelian: string;
+  distributorId: string;
+  jumlah: number;
+  total_biaya_transaksi: number;
+  date: string;
+};
+
+export type CustomerField = {
   id: string;
   name: string;
+  phone: string;
+  gender: string;
+  poin: number;
+  image_url: string;
 };
 
-export type Poin = {
-  id: string;
-  totalPoints : number,
-};
-
-export type Customer = {
-  id: string;
-  name: string;
-  phone : string;
-  createdAt : string;
-  updatedAt : string;
-  gender: string,
-  poin : number,
-};
-
-
-export type Distributors = {
-  id: string;
-  name: string;
-  phone : string;
-  createdAt : string;
-  updatedAt : string;
-};
-
-export type Pegawai = {
-  id: string;
-  id_role : string
-  name: string;
-  phone : string;
-  createdAt : string;
-  updatedAt : string;
-  gender : string;
-  email : string;
-  password : string;
-};
-
-export type Products = {
+export type ProductsField = {
   id: string;
   name: string;
   stock: number;
   price: number;
-  distributorId : string;
-  createdAt : string;
-  updatedAt : string;
+  distributorId: string;
   image_url: string;
 };
 
-export type Penjualan = {
+export type PegawaiField = {
   id: string;
-  id_pegawai : string;
-  customerId : string;
-  id_produk : string;
-  jumlah : number;
-  total : number;
-  poin : number;
-  date : string;
-};
-
-export type Pembelian = {
-  id: string;
-  id_pegawai : string;
-  jumlah : number;
-  total : number;
-  date: string;
+  name: string;
+  phone: string;
+  gender: string;
+  email: string;
+  password: string;
 };
 
 export type Revenue = {
@@ -82,149 +60,64 @@ export type Revenue = {
   revenue: number;
 };
 
-export type Stock = {
-  id : string;
-  id_produk : string;
-  jumlah : number;
-};
-
-export type DetailTransaksiPenjualan = {
-  id: string;
-  id_penjualan: string;
-  id_produk: string;
-  id_jumlah : string;
-  id_harga : number;
-  date : string;
-};
-
-export type DetailTransaksiPembelian = {
-  id: string;
-  id_pembelian: string;
-  distributorId: string;
-  id_jumlah : string;
-  id_total_biaya_transaksi : number;
-  date : string;
-};
-
-export type LatestPenjualan = {
+export type CustomersTableType = {
   id: string;
   name: string;
+  phone: string;
+  gender: string;
+  poin: number;
   image_url: string;
-  email: string;
-  amount: string;
 };
 
-// The database returns a number for amount, but we later format it to a string with the formatCurrency function
-export type LatestPenjualanRaw = Omit<LatestPenjualan, 'amount'> & {
-  amount: number;
+export type CustomersForm = {
+  id: string;
+  name: string;
+  phone: string;
+  gender: string;
+  poin: number;
+  image_url: string;
 };
 
 export type LatestCustomer = {
   id: string;
   name: string;
   phone: string;
-  image_url: string;
+  gender: string;
+  poin: number;
+  createdAt: string;
+  updatedAt: string;
 };
-
-
-export type PenjualanTable = {
-  id: string;
-  id_pegawai : string;
-  customerId : string;
-  id_produk : string;
-  jumlah : number;
-  total : number;
-  poin : number;
-  date : string;
-};
-
-export type CustomersTableType = {
-  id: string;
-  name: string;
-  phone: string;
-  image_url: string;
-  gender : string;
-  poin : string;
-};
-
-export type PegawaiTableType = {
-  id: string;
-  name: string;
-  phone: string;
-  gender : string;
-  email : string;
-  password : string;
-};
-
-export type DistributorTableType = {
-  id: string;
-  name: string;
-  phone: string;
-};
-
-export type PoinTableType = {
-  id: string;
-  totalPoints : number;
-};
-
-export type ProductsTableType = {
-  id: string;
-  name: string;
-  stock: number;
-  image_url: string;
-  price: number;
-};
-
-
-export type FormattedCustomersTable = {
-  id: string;
-  name: string;
-  phone: string;
-  image_url: string;
-};
-
-
-export type CustomerField = {
-  id: string;
-  name: string;
-  
-};
-
-
-export type DistributorField = {
-  id: string;
-  name: string;
-  phone: string;
-};
-
-export type ProductsField = {
-  id: string;
-  name: string;
-  price: number;
-  stock: number;
-};
-
-export type PegawaiField = {
-  id: string;
-  name: string;
-  phone : string;
-  gender : string;
-  email : string;
-  password : string;
-};
-
 
 export type PenjualanForm = {
   id: string;
-  customer_id: string;
-  product_id: string;
-  id_pegawai : string;
+  date: string;
+  id_produk: string;
+  customerId: string;
+  id_pegawai: string;
+  jumlah: number;
   total: number;
+  poin: number;
 };
 
-export type PembelianForm = {
+export type LatestPenjualanRaw = {
   id: string;
-  id_pegawai : string;
+  amount: number;
+  name: string;
+  email: string;
+  image_url: string;
+};
+
+export type Roles = {
+  id: string;
+  name: string;
+};
+
+export type ProductsTable = {
+  id: string;
+  name: string;
+  stock: number;
+  price: number;
+  image_url: string;
 };
 
 export type ProductForm = {
@@ -235,22 +128,24 @@ export type ProductForm = {
   image_url: string;
 };
 
-export type CustomersForm = {
+export type ProductsTableType = {
   id: string;
   name: string;
-  phone: string;
-  gender : string;
-  poin : string;
+  stock: number;
+  price: number;
   image_url: string;
 };
 
-export type PegawaiForm = {
+export type DistributorField = {
   id: string;
   name: string;
   phone: string;
-  gender : string;
-  email : string;
-  password : string;
+};
+
+export type DistributorTableType = {
+  id: string;
+  name: string;
+  phone: string;
 };
 
 export type DistributorForm = {
@@ -259,34 +154,28 @@ export type DistributorForm = {
   phone: string;
 };
 
+export type Pegawai = {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+};
 
-export type CustomersTable = {
+export type PegawaiTableType = {
   id: string;
   name: string;
   phone: string;
-  createdAt : string;
-  updatedAt : string;
-  gender : string;
-  image_url : string;
+  gender: string;
+  email: string;
+  password: string;
 };
 
-export type DistributorsTable = {
+export type PegawaiForm = {
   id: string;
   name: string;
   phone: string;
-  createdAt : string;
-  updatedAt : string;
-  image_url : string;
-};
-
-export type ProductsTable = {
-  id: string;
-  name: string;
-  stock: number;
-  price: number;
-  distributorId : string;
-  createdAt : string;
-  updatedAt : string;
-  image_url : string;
+  gender: string;
+  email: string;
+  password: string;
 };
 

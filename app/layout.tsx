@@ -1,7 +1,7 @@
 import '@/app/ui/global.css';
 import { oswald } from '@/app/ui/fonts';
 import { Metadata } from 'next';
- 
+
 export const metadata: Metadata = {
   title: {
     template: '%s | SIBROMEN',
@@ -18,7 +18,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${oswald.variable}`}>{children}</body>
+      <body className={`${oswald.variable}`}>
+        {children}
+      </body>
     </html>
   );
 }

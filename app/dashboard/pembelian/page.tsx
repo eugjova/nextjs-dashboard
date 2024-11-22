@@ -7,7 +7,6 @@ import {
   fetchPenjualanPages, 
   fetchCustomers, 
   fetchProducts, 
- 
 } from '@/app/lib/data';
 import {
   SearchSkeleton,
@@ -30,25 +29,25 @@ export default async function Page({
     page?: string;
   };
 }) {
-  const query = searchParams?.query || '';
-  const currentPage = Number(searchParams?.page) || 1;
-  // const totalPages = await fetchPenjualanPages(query);
+  const params = await Promise.resolve(searchParams);
+  const query = params?.query || '';
+  const currentPage = Number(params?.page) || 1;
   const customers = await fetchCustomers();
   const products = await fetchProducts();
  
   return (
     <div className="flex min-h-screen flex-col">
-      <p className={`${oswald.variable} text-3xl text-white`}>Penjualan Page</p>
-    <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-      <Suspense fallback={<SearchSkeleton />}>
-        <Search placeholder="Search Pembelian..." />
-      </Suspense>
-      <Suspense fallback={<CreateSkeleton />}>
-      <Form pegawai={pegawai} distributors={distributors}/>
-      </Suspense>
-    </div>
+      <p className={`${oswald.variable} text-3xl text-white`}>Pembelian Page</p>
+      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
+        <Suspense fallback={<SearchSkeleton />}>
+          <Search placeholder="Search Pembelian..." />
+        </Suspense>
+        <Suspense fallback={<CreateSkeleton />}>
+          <Form pegawai={pegawai} distributors={distributors}/>
+        </Suspense>
+      </div>
 
-    <div className="mt flow-root">
+      <div className="mt flow-root">
         <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
           <Table query={query} currentPage={currentPage} />
         </Suspense>

@@ -7,7 +7,7 @@ import {
   fetchPenjualanPages, 
   fetchCustomers, 
   fetchProducts, 
- 
+  fetchPegawai,
 } from '@/app/lib/data';
 import {
   SearchSkeleton,
@@ -31,33 +31,44 @@ export default async function Page({
     page?: string;
   };
 }) {
-  const query = searchParams?.query || '';
-  const currentPage = Number(searchParams?.page) || 1;
-  // const totalPages = await fetchPenjualanPages(query);
-  // const customers = await fetchCustomers();
-  // const products = await fetchProducts();
- 
+  const params = await Promise.resolve(searchParams);
+  const query = params?.query || '';
+  const currentPage = Number(params?.page) || 1;
+  
+  // Fetch data yang diperlukan
+  const customers = await fetchCustomers();
+  const products = await fetchProducts();
+  const productsWithDistributor = products.map(product => ({
+    ...product,
+    distributorId: ''
+  }));
+  const pegawai = await fetchPegawai();
+  const totalPages = await fetchPenjualanPages(query);
+
   return (
     <div className="flex min-h-screen flex-col">
       <p className={`${oswald.variable} text-3xl text-white`}>Penjualan Page</p>
-    <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-      <Suspense fallback={<SearchSkeleton />}>
-        <Search placeholder="Search penjualan..." />
-      </Suspense>
-      <Suspense fallback={<CreateSkeleton />}>
-      <Form products={products}/>
-      
-      </Suspense>
-    </div>
+      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
+        <Suspense fallback={<SearchSkeleton />}>
+          <Search placeholder="Search penjualan..." />
+        </Suspense>
+        <Suspense fallback={<CreateSkeleton />}>
+          <Form 
+            customers={customers} 
+            products={productsWithDistributor}
+            pegawai={pegawai}
+          />
+        </Suspense>
+      </div>
 
-    <div className="mt flow-root">
-        {/* <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}> */}
+      <div className="mt flow-root">
+        <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
           <Table query={query} currentPage={currentPage} />
-        {/* </Suspense> */}
+        </Suspense>
       </div>
 
       <div className="mt-5 flex w-full justify-center">
-        {/* <Pagination totalPages={totalPages} /> */}
+        <Pagination totalPages={totalPages} />
       </div>
     </div>
   );

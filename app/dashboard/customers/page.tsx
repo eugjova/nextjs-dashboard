@@ -25,8 +25,9 @@ export default async function Page(
       page?: string;
     };
   }) {
-  const query = searchParams?.query || '';
-  const currentPage = Number(searchParams?.page) || 1;
+  const params = await Promise.resolve(searchParams);
+  const query = params?.query || '';
+  const currentPage = Number(params?.page) || 1;
   // const totalPages = await fetchCustomersPages(query);
  
   await new Promise((resolve) => setTimeout(resolve, 3000));

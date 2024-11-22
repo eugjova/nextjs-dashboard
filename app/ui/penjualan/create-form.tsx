@@ -99,7 +99,7 @@ export default function Form({
         setTotalPrice(newTotalPrice);
         
         if (usePoin) {
-          const maxPoinAllowed = Math.floor(newTotalPrice / 1000);
+          const maxPoinAllowed = Math.floor(newTotalPrice / 5000);
           if (usedPoin > maxPoinAllowed) {
             setUsedPoin(0);
           }
@@ -112,7 +112,7 @@ export default function Form({
 
   useEffect(() => {
     if (totalPrice > 0) {
-      const poinValue = usePoin ? usedPoin * 1000 : 0;
+      const poinValue = usePoin ? usedPoin * 5000 : 0;
       const newTotalBayar = totalPrice - poinValue;
       setTotalBayar(newTotalBayar);
       
@@ -153,7 +153,7 @@ export default function Form({
       return;
     }
 
-    const maxPoinAllowed = Math.floor(totalPrice / 1000);
+    const maxPoinAllowed = Math.floor(totalPrice / 5000);
     
     if (value > maxPoinAllowed) {
       toast.error(`Maksimal poin yang dapat digunakan: ${maxPoinAllowed}`);
@@ -161,7 +161,7 @@ export default function Form({
     }
 
     setUsedPoin(value);
-    const poinValue = value * 1000;
+    const poinValue = value * 5000;
     setTotalBayar(totalPrice - poinValue);
   };
 
@@ -436,10 +436,10 @@ export default function Form({
                       </div>
                       <div className="mt-2 text-sm">
                         <p className="text-gray-500">
-                          Nilai Poin: {formatCurrency(usedPoin * 1000)}
+                          Nilai Poin: {formatCurrency(usedPoin * 5000)}
                         </p>
                         <p className="text-gray-500">
-                          Maksimal Poin: {Math.floor(totalPrice / 1000)}
+                          Maksimal Poin: {Math.floor(totalPrice / 5000)}
                         </p>
                       </div>
                     </div>

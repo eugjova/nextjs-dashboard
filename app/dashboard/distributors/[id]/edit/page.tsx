@@ -3,7 +3,7 @@ import Breadcrumbs from '@/app/ui/products/breadcrumbs';
 import { fetchDistributorById } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
  
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }: { params: any }) {
     const id = params.id;
     const [distributors] = await Promise.all([
         fetchDistributorById(id),

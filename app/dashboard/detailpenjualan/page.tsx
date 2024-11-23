@@ -18,10 +18,7 @@ export const metadata: Metadata = {
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: {
-    query?: string;
-    page?: string;
-  };
+  searchParams?: any;
 }) {
   const params = await Promise.resolve(searchParams);
   const query = params?.query || '';

@@ -191,3 +191,223 @@ export async function authenticate(
     throw error;
   }
 }
+
+// Customer
+export async function updateCustomer(id: string, formData: FormData) {
+  const { name, phone, gender, poin } = CustomerSchema.parse({
+    name: formData.get('name'),
+    phone: formData.get('phone'), 
+    gender: formData.get('gender'),
+    poin: formData.get('poin'),
+  });
+
+  try {
+    await sql`
+      UPDATE customers
+      SET name = ${name}, phone = ${phone}, gender = ${gender}, poin = ${parseInt(poin)}
+      WHERE id = ${id}
+    `;
+    revalidatePath('/dashboard/customers');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Failed to update customer.' };
+  }
+}
+
+// Distributor
+export async function deleteDistributors(id: string) {
+  try {
+    await sql`DELETE FROM distributors WHERE id = ${id}`;
+    revalidatePath('/dashboard/distributors');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Failed to delete distributor.' };
+  }
+}
+
+export async function updateDistributors(id: string, formData: FormData) {
+  const { name, phone } = z.object({
+    name: z.string(),
+    phone: z.string()
+  }).parse({
+    name: formData.get('name'),
+    phone: formData.get('phone')
+  });
+
+  try {
+    await sql`
+      UPDATE distributors 
+      SET name = ${name}, phone = ${phone}
+      WHERE id = ${id}
+    `;
+    revalidatePath('/dashboard/distributors');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Failed to update distributor.' };
+  }
+}
+
+// Pegawai
+export async function deletePegawai(id: string) {
+  try {
+    await sql`DELETE FROM pegawai WHERE id = ${id}`;
+    revalidatePath('/dashboard/pegawai');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Failed to delete pegawai.' };
+  }
+}
+
+export async function createPegawai(formData: FormData) {
+  const { name, phone, gender, email, password } = z.object({
+    name: z.string(),
+    phone: z.string(),
+    gender: z.string(),
+    email: z.string().email(),
+    password: z.string().min(6)
+  }).parse({
+    name: formData.get('name'),
+    phone: formData.get('phone'),
+    gender: formData.get('gender'),
+    email: formData.get('email'),
+    password: formData.get('password')
+  });
+
+  try {
+    await sql`
+      INSERT INTO pegawai (name, phone, gender, email, password)
+      VALUES (${name}, ${phone}, ${gender}, ${email}, ${password})
+    `;
+    revalidatePath('/dashboard/pegawai');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Failed to create pegawai.' };
+  }
+}
+
+export async function updatePegawai(id: string, formData: FormData) {
+  const { name, phone, gender, email, password } = z.object({
+    name: z.string(),
+    phone: z.string(),
+    gender: z.string(),
+    email: z.string().email(),
+    password: z.string().min(6)
+  }).parse({
+    name: formData.get('name'),
+    phone: formData.get('phone'),
+    gender: formData.get('gender'),
+    email: formData.get('email'),
+    password: formData.get('password')
+  });
+
+  try {
+    await sql`
+      UPDATE pegawai
+      SET name = ${name}, phone = ${phone}, gender = ${gender}, 
+          email = ${email}, password = ${password}
+      WHERE id = ${id}
+    `;
+    revalidatePath('/dashboard/pegawai');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Failed to update pegawai.' };
+  }
+}
+
+// Product
+export async function deleteProduct(id: string) {
+  try {
+    await sql`DELETE FROM products WHERE id = ${id}`;
+    revalidatePath('/dashboard/products');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Failed to delete product.' };
+  }
+}
+
+export async function createProduct(formData: FormData) {
+  const { name, stock, price, image_url } = z.object({
+    name: z.string(),
+    stock: z.string(),
+    price: z.string(),
+    image_url: z.string()
+  }).parse({
+    name: formData.get('name'),
+    stock: formData.get('stock'),
+    price: formData.get('price'),
+    image_url: formData.get('image_url') || '/products/default.png'
+  });
+
+  try {
+    await sql`
+      INSERT INTO products (name, stock, price, image_url)
+      VALUES (${name}, ${parseInt(stock)}, ${parseInt(price)}, ${image_url})
+    `;
+    revalidatePath('/dashboard/products');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Failed to create product.' };
+  }
+}
+
+export async function updateProduct(id: string, formData: FormData) {
+  const { name, stock, price, image_url } = z.object({
+    name: z.string(),
+    stock: z.string(),
+    price: z.string(),
+    image_url: z.string()
+  }).parse({
+    name: formData.get('name'),
+    stock: formData.get('stock'),
+    price: formData.get('price'),
+    image_url: formData.get('image_url')
+  });
+
+  try {
+    await sql`
+      UPDATE products
+      SET name = ${name}, stock = ${parseInt(stock)}, 
+          price = ${parseInt(price)},
+          image_url = ${image_url}
+      WHERE id = ${id}
+    `;
+    revalidatePath('/dashboard/products');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Failed to update product.' };
+  }
+}
+
+export async function createDistributors(formData: FormData) {
+  const { name, phone } = z.object({
+    name: z.string(),
+    phone: z.string()
+  }).parse({
+    name: formData.get('name'),
+    phone: formData.get('phone')
+  });
+
+  try {
+    await sql`
+      INSERT INTO distributors (name, phone)
+      VALUES (${name}, ${phone})
+    `;
+    
+    revalidatePath('/dashboard/distributors');
+    return { success: true };
+  } catch (error) {
+    console.error('Database Error:', error);
+    return { success: false, error: 'Failed to create distributor.' };
+  }
+}
+
+export async function deleteInvoice(id: string) {
+  try {
+    await sql`DELETE FROM pembelian WHERE id = ${id}`;
+    revalidatePath('/dashboard/pembelian');
+    return { success: true };
+  } catch (error) {
+    console.error('Database Error:', error);
+    return { success: false, error: 'Failed to delete pembelian.' };
+  }
+}

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: 'Edit Pegawai',
 };
  
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }: { params: any }) {
     const id = params.id;
     const [ pegawai ] = await Promise.all([
         fetchPegawaiById(id),

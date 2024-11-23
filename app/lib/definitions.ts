@@ -179,3 +179,14 @@ export type PegawaiForm = {
   password: string;
 };
 
+export type FormattedCustomersTable = {
+  id: string;
+  name: string;
+  phone: string;
+  gender: string;
+  poin: number;
+  image_url: string;
+  createdAt: string;
+  updatedAt: string;
+};
+

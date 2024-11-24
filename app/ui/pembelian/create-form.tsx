@@ -1,207 +1,249 @@
 'use client';
 
-import { CustomerField, DistributorField, PegawaiField, ProductsField } from '@/app/lib/definitions';
+import { PegawaiField, DistributorField } from '@/app/lib/definitions';
+import { createPembelian } from '@/app/lib/action';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
+import { useFormStatus } from 'react-dom';
 import {
-  PlusIcon,
-  ShoppingCartIcon,
+  CalendarIcon,
+  UserCircleIcon,
+  CurrencyDollarIcon,
   ArchiveBoxIcon,
-  IdentificationIcon,
-  CheckBadgeIcon,
-  GiftIcon,
-  KeyIcon,
-  CurrencyDollarIcon 
+  PlusIcon,
 } from '@heroicons/react/24/outline';
-import { Button } from '@/app/ui/button';
-import { createPembelian} from '@/app/lib/action';
-import Breadcrumbs from '@/app/ui/distributors/breadcrumbs';
-import React, { useState } from 'react';
+import { formatCurrency } from '@/app/lib/utils';
 
-export default function Form({
-  pegawai, 
-  distributors
-}: {
-  pegawai: PegawaiField[],
-  distributors : DistributorField[]
+export default function Form({ 
+  pegawai,
+  distributors,
+}: { 
+  pegawai: PegawaiField[];
+  distributors: DistributorField[];
 }) {
+  const router = useRouter();
   const [modal, setModal] = useState(false);
-  const [selectedProductPrice, setSelectedProductPrice] = useState(0);
-  const [quantity, setQuantity] = useState(0);
-
+  const [quantity, setQuantity] = useState<number>(0);
+  const [total, setTotal] = useState<string>('0');
+  const [error, setError] = useState<string>('');
 
   function handleChange() {
-    setModal(!modal);
     if (modal) {
       resetForm();
     }
-  }
-
-  function handlePegawaiChange(event: React.ChangeEvent<HTMLSelectElement>) {
-    const selectedPegawaiId = event.target.value;
-    const selectedPegawai = pegawai.find(pegawai => pegawai.id === selectedPegawaiId);
-  }
-
-  function handleDistributorChange(event: React.ChangeEvent<HTMLSelectElement>) {
-    const selectedDistributorId = event.target.value;
-    const selectedDistributor = distributors.find(distributors => distributors.id === selectedDistributorId);
-  }
-
-  function handleQuantityChange(event: React.ChangeEvent<HTMLInputElement>) {
-    setQuantity(parseInt(event.target.value, 10));
+    setModal(!modal);
   }
 
   function resetForm() {
-    setSelectedProductPrice(0);
     setQuantity(0);
+    setTotal('0');
+    setError('');
   }
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    try {
-      await createPembelian(formData);
-      setModal(false);
-      resetForm();
-    } catch (error) {
-      console.error('Failed to create invoice:', error);
+  const handleTotalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const numericValue = e.target.value.replace(/\D/g, '');
+    setTotal(numericValue);
+  };
+
+  const formattedTotal = formatCurrency(parseInt(total) || 0);
+
+  const handleSubmit = async (formData: FormData) => {
+    if (quantity <= 0) {
+      setError('Jumlah item harus lebih dari 0');
+      return;
     }
+
+    if (parseInt(total) <= 0) {
+      setError('Total harga harus lebih dari 0');
+      return;
+    }
+
+    try {
+      const result = await createPembelian(formData);
+      
+      if (result.success) {
+        toast.success('Pembelian berhasil dibuat!');
+        resetForm();
+        setModal(false);
+        router.refresh();
+      } else {
+        toast.error(result.error || 'Terjadi kesalahan');
+      }
+    } catch (error) {
+      toast.error('Terjadi kesalahan saat membuat pembelian');
+      console.error('Error:', error);
+    }
+  };
+
+  function SubmitButton() {
+    const { pending } = useFormStatus();
+    
+    return (
+      <button
+        type="submit"
+        className={`flex h-10 items-center rounded-lg px-4 text-sm font-medium text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 ${
+          pending ? 'bg-red-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-500'
+        }`}
+        disabled={pending}
+      >
+        {pending ? 'Memproses...' : 'Bayar'}
+      </button>
+    );
   }
 
-  // async function LoyaltyToggle() {
-  //   const [loyaltyEnabled, setLoyaltyEnabled] = useState(false);
-  
-  //   function handleLoyaltyToggle(event: React.MouseEvent<HTMLButtonElement>): void {
-  //     setLoyaltyEnabled(!loyaltyEnabled);
-  //     console.log('Button clicked:', event.currentTarget);
-  //   }
+  function CancelButton({ onClick }: { onClick: () => void }) {
+    const { pending } = useFormStatus();
+    
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={pending}
+        className={`flex h-10 items-center rounded-lg px-4 text-sm font-medium transition-colors ${
+          pending 
+          ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+        }`}
+      >
+        Batal
+      </button>
+    );
+  }
 
   return (
-    <div className="flex items-start justify-center">
+    <div className="flex items-center justify-center">
       <button
-        className="flex h-10 items-center rounded-lg bg-red-600 px-4 text-sm font-medium text-white transition-colors hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuschia-600"
+        className="flex h-10 items-center rounded-lg bg-red-600 px-4 text-sm font-medium text-white transition-colors hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
         onClick={handleChange}
       >
         <span className="hidden md:block">Create Pembelian</span>{' '}
         <PlusIcon className="h-5 md:ml-4" />
       </button>
+
       {modal && (
         <div className="modal fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="modal-box relative bg-white p-4 md:p-6 rounded-md shadow-md border border-gray-300 w-full max-w-xl">
-            <form className="w-full max-w-lg" onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <Breadcrumbs
-                  breadcrumbs={[
-                    { label: 'Pembelian', href: '/dashboard/pembelian' },
-                    {
-                      label: 'Create Pembelian',
-                      href: '/dashboard/pembelian/create',
-                      active: true,
-                    },
-                  ]}
-                />
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="pegawai" className="mb-2 block text-sm font-medium">
-                  Pegawai
-                </label>
-                <div className="relative">
-                  <select
-                    id="pegawai"
-                    name="id_pegawai"
-                    className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                    defaultValue=""
-                    onChange={handlePegawaiChange}
-                  >
-                    <option value="" disabled>
-                      Select a pegawai
-                    </option>
-                    {pegawai.map((pegawai) => (
-                      <option key={pegawai.id} value={pegawai.id}>
-                        {pegawai.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ShoppingCartIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
+          <div className="relative w-full max-w-3xl rounded-xl bg-white p-6 shadow-lg">
+            <form action={handleSubmit}>
+              {error && (
+                <div className="mb-4 rounded-lg bg-red-100 p-3 text-red-500">
+                  {error}
                 </div>
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="distributors" className="mb-2 block text-sm font-medium">
-                  Distributor
-                </label>
-                <div className="relative">
-                  <select
-                    id="distributor"
-                    name="id_distributor"
-                    className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                    defaultValue=""
-                    onChange={handleDistributorChange}
-                  >
-                   <option value="" disabled>
-                      Select a Distributor
-                    </option>
-                    {distributors.map((distributor) => (
-                      <option key={distributor.id} value={distributor.id}>
-                        {distributor.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ShoppingCartIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="jumlah" className="mb-2 block text-sm font-medium">
-                  Jumlah
-                </label>
-                <div className="relative mt-2 rounded-md">
-                  <div className="relative">
+              )}
+              
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="date" className="block text-sm font-medium">
+                    Tanggal Transaksi
+                  </label>
+                  <div className="relative mt-1">
                     <input
-                      id="jumlah"
-                      name="jumlah"
-                      type="number"
-                      placeholder="Enter Jumlah"
-                      className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                      type="date"
+                      id="date"
+                      name="date"
+                      className="block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm"
+                      required
                     />
-                    <ArchiveBoxIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+                    <CalendarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
                   </div>
                 </div>
-              </div>
 
+                <div>
+                  <label htmlFor="pegawai" className="block text-sm font-medium">
+                    Pegawai
+                  </label>
+                  <div className="relative mt-1">
+                    <select
+                      id="pegawai"
+                      name="pegawaiId"
+                      className="block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm"
+                      required
+                    >
+                      <option value="">Pilih pegawai</option>
+                      {pegawai.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                    <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
+                  </div>
+                </div>
 
-              <div className="mb-4">
-                <label htmlFor="total" className="mb-2 block text-sm font-medium">
-                  Total (IDR)
-                </label>
-                <div className="relative mt-2 rounded-md">
-                  <div className="relative">
+                <div>
+                  <label htmlFor="distributor" className="block text-sm font-medium">
+                    Distributor
+                  </label>
+                  <div className="relative mt-1">
+                    <select
+                      id="distributor"
+                      name="distributorId"
+                      className="block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm"
+                      required
+                    >
+                      <option value="">Pilih distributor</option>
+                      {distributors.map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.name}
+                        </option>
+                      ))}
+                    </select>
+                    <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="quantity" className="block text-sm font-medium">
+                    Jumlah Item
+                  </label>
+                  <div className="relative mt-1">
                     <input
+                      type="number"
+                      id="quantity"
+                      name="quantity"
+                      value={quantity === 0 ? '' : quantity}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? 0 : parseInt(e.target.value);
+                        setQuantity(value);
+                        setError('');
+                      }}
+                      className="block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm"
+                      required
+                    />
+                    <ArchiveBoxIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="total" className="block text-sm font-medium">
+                    Total Harga
+                  </label>
+                  <div className="relative mt-1">
+                    <input
+                      type="text"
                       id="total"
                       name="total"
-                      type="number"
-                      placeholder="Enter Total"
-                      className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                      value={formattedTotal}
+                      onChange={handleTotalChange}
+                      className="block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm"
+                      required
                     />
-                    <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+                    <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
                   </div>
                 </div>
               </div>
 
-
               <div className="mt-6 flex justify-end gap-4">
-                <button
-                  type="button"
-                  onClick={handleChange}
-                  className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
-                >
-                  Cancel
-                </button>
-                <Button type="submit">Create Pembelian</Button>
+                <CancelButton onClick={handleChange} />
+                <SubmitButton />
               </div>
             </form>
           </div>
         </div>
       )}
+      
+      <Toaster position="top-center" reverseOrder={false} />
     </div>
   );
 }

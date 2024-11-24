@@ -6,7 +6,6 @@ import { z } from 'zod';
 import { signIn } from 'next-auth/react';
 import { AuthError } from 'next-auth';
 
-// Schema untuk Customer
 const CustomerSchema = z.object({
   name: z.string(),
   phone: z.string(),
@@ -15,29 +14,23 @@ const CustomerSchema = z.object({
   image_url: z.string(),
 });
 
-// Schema untuk Pembelian
 const PembelianSchema = z.object({
   date: z.string(),
-  id_pegawai: z.string(),
-  id_distributor: z.string(),
-  jumlah: z.string(),
-  total: z.string(),
-});
-
-// Schema untuk Penjualan
-const PenjualanSchema = z.object({
-  date: z.string(),
-  productId: z.string(),
-  customerId: z.string(),
   pegawaiId: z.string(),
+  distributorId: z.string(),
   quantity: z.string(),
   total: z.string(),
-  totalBayar: z.string(),
-  usedPoin: z.coerce.number().optional(),
-  earnedPoin: z.coerce.number(),
 });
 
-// Fungsi Create Customer
+const PenjualanSchema = z.object({
+  date: z.string(),
+  customerId: z.string(),
+  pegawaiId: z.string(),
+  poin_used: z.coerce.number().default(0),
+  total_amount: z.coerce.number(),
+  total_bayar: z.coerce.number(),
+});
+
 export async function createCustomer(formData: FormData) {
   const { name, phone, gender, poin, image_url } = CustomerSchema.parse({
     name: formData.get('name'),
@@ -61,7 +54,6 @@ export async function createCustomer(formData: FormData) {
   }
 }
 
-// Fungsi Delete Customer
 export async function deleteCustomer(id: string) {
   try {
     await sql`DELETE FROM customers WHERE id = ${id}`;
@@ -73,20 +65,31 @@ export async function deleteCustomer(id: string) {
   }
 }
 
-// Fungsi Create Pembelian
 export async function createPembelian(formData: FormData) {
-  const { date, id_pegawai, id_distributor, jumlah, total } = PembelianSchema.parse({
+  const { date, pegawaiId, distributorId, quantity, total } = PembelianSchema.parse({
     date: formData.get('date'),
-    id_pegawai: formData.get('id_pegawai'),
-    id_distributor: formData.get('id_distributor'),
-    jumlah: formData.get('jumlah'),
-    total: formData.get('total'),
+    pegawaiId: formData.get('pegawaiId'),
+    distributorId: formData.get('distributorId'),
+    quantity: formData.get('quantity'),
+    total: String(formData.get('total'))?.replace(/[^0-9]/g, ''),
   });
 
   try {
     await sql`
-      INSERT INTO pembelian (date, id_pegawai, id_distributor, jumlah, total)
-      VALUES (${date}, ${id_pegawai}, ${id_distributor}, ${parseInt(jumlah)}, ${parseInt(total)})
+      INSERT INTO pembelian (
+        date,
+        pegawaiId,
+        distributorId,
+        jumlah,
+        total
+      )
+      VALUES (
+        ${date},
+        ${pegawaiId},
+        ${distributorId},
+        ${parseInt(quantity)},
+        ${parseInt(total)}
+      )
     `;
 
     revalidatePath('/dashboard/pembelian');
@@ -97,67 +100,82 @@ export async function createPembelian(formData: FormData) {
   }
 }
 
-// Fungsi Create Penjualan
 export async function createPenjualan(formData: FormData) {
-  const { date, productId, customerId, pegawaiId, quantity, total, totalBayar, usedPoin, earnedPoin } = PenjualanSchema.parse({
-    date: formData.get('date'),
-    productId: formData.get('productId'),
-    customerId: formData.get('customerId'),
-    pegawaiId: formData.get('pegawaiId'),
-    quantity: formData.get('quantity'),
-    total: String(formData.get('total'))?.replace(/[^0-9]/g, ''),
-    totalBayar: String(formData.get('totalBayar'))?.replace(/[^0-9]/g, ''),
-    usedPoin: formData.get('usedPoin'),
-    earnedPoin: formData.get('earnedPoin'),
-  });
-
   try {
-    // 1. Insert penjualan
-    const result = await sql`
-      INSERT INTO penjualan (
-        date,
-        id_produk,
-        customerId,
-        id_pegawai,
-        jumlah,
-        total,
-        total_bayar,
-        poin
-      )
-      VALUES (
-        ${date},
-        ${productId},
-        ${customerId},
-        ${pegawaiId},
-        ${parseInt(quantity)},
-        ${parseInt(total)},
-        ${parseInt(totalBayar)},
-        ${usedPoin || 0}
-      )
-      RETURNING id
-    `;
+    const rawData = {
+      date: formData.get('date'),
+      customerId: formData.get('customerId'),
+      pegawaiId: formData.get('pegawaiId'),
+      poin_used: formData.get('usedPoin') || 0,
+      total_amount: String(formData.get('total'))?.replace(/[^0-9]/g, ''),
+      total_bayar: String(formData.get('totalBayar'))?.replace(/[^0-9]/g, ''),
+    };
 
-    // 2. Update stok produk
+    console.log('Raw form data:', rawData);
+
+    const penjualanData = PenjualanSchema.parse(rawData);
+
+    const penjualanId = crypto.randomUUID();
+
     await sql`
-      UPDATE products 
-      SET stock = stock - ${parseInt(quantity)}
-      WHERE id = ${productId}
+      INSERT INTO penjualan (
+        id,
+        date,
+        customerId,
+        pegawaiId,
+        poin_used,
+        total_amount,
+        total_bayar
+      ) VALUES (
+        ${penjualanId},
+        ${penjualanData.date},
+        ${penjualanData.customerId},
+        ${penjualanData.pegawaiId},
+        ${penjualanData.poin_used},
+        ${penjualanData.total_amount},
+        ${penjualanData.total_bayar}
+      )
     `;
 
-    // 3. Update poin customer
-    if (usedPoin) {
-      // Kurangi poin jika menggunakan poin
+    const productCount = parseInt(formData.get('productCount') as string);
+    console.log('Product count:', productCount);
+
+    for (let i = 0; i < productCount; i++) {
+      const productId = formData.get(`product-${i}`) as string;
+      const quantity = parseInt(formData.get(`quantity-${i}`) as string);
+      const price = parseInt(String(formData.get(`price-${i}`))?.replace(/[^0-9]/g, ''));
+      
+      console.log(`Product ${i}:`, { productId, quantity, price });
+
+      if (!productId || isNaN(quantity) || isNaN(price)) {
+        console.error(`Invalid product data at index ${i}`);
+        continue;
+      }
+
+      const subtotal = quantity * price;
+
       await sql`
-        UPDATE customers 
-        SET poin = poin - ${usedPoin}
-        WHERE id = ${customerId}
+        INSERT INTO penjualan_items (
+          id,
+          penjualan_id,
+          product_id,
+          quantity,
+          price_per_item,
+          subtotal
+        ) VALUES (
+          ${crypto.randomUUID()},
+          ${penjualanId},
+          ${productId as string},
+          ${quantity},
+          ${price},
+          ${subtotal}
+        )
       `;
-    } else if (earnedPoin > 0) {
-      // Tambah poin baru jika tidak menggunakan poin
+
       await sql`
-        UPDATE customers 
-        SET poin = poin + ${earnedPoin}
-        WHERE id = ${customerId}
+        UPDATE products 
+        SET stock = stock - ${quantity}
+        WHERE id = ${productId}
       `;
     }
 
@@ -165,7 +183,7 @@ export async function createPenjualan(formData: FormData) {
     return { success: true };
   } catch (error) {
     console.error('Database Error:', error);
-    return { success: false, error: 'Failed to create penjualan.' };
+    return { success: false, error: String(error) };
   }
 }
 
@@ -192,7 +210,6 @@ export async function authenticate(
   }
 }
 
-// Customer
 export async function updateCustomer(id: string, formData: FormData) {
   const { name, phone, gender, poin } = CustomerSchema.parse({
     name: formData.get('name'),
@@ -214,7 +231,6 @@ export async function updateCustomer(id: string, formData: FormData) {
   }
 }
 
-// Distributor
 export async function deleteDistributors(id: string) {
   try {
     await sql`DELETE FROM distributors WHERE id = ${id}`;
@@ -247,7 +263,6 @@ export async function updateDistributors(id: string, formData: FormData) {
   }
 }
 
-// Pegawai
 export async function deletePegawai(id: string) {
   try {
     await sql`DELETE FROM pegawai WHERE id = ${id}`;
@@ -314,7 +329,6 @@ export async function updatePegawai(id: string, formData: FormData) {
   }
 }
 
-// Product
 export async function deleteProduct(id: string) {
   try {
     await sql`DELETE FROM products WHERE id = ${id}`;

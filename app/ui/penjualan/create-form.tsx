@@ -5,8 +5,8 @@ import {
   CalendarIcon,
   UserCircleIcon,
   CurrencyDollarIcon,
-  ArchiveBoxIcon,
   PlusIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import { createPenjualan } from '@/app/lib/action';
 import { useEffect, useState } from 'react';
@@ -15,6 +15,13 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
 import { useFormStatus } from 'react-dom';
+
+interface ProductItem {
+  productId: string;
+  quantity: number;
+  price: number;
+  subtotal: number;
+}
 
 export default function Form({ 
   customers,
@@ -27,7 +34,6 @@ export default function Form({
 }) {
   const router = useRouter();
   const [modal, setModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState('');
   const [quantity, setQuantity] = useState<number | ''>(1);
   const [totalPrice, setTotalPrice] = useState(0);
@@ -37,6 +43,12 @@ export default function Form({
   const [totalBayar, setTotalBayar] = useState(0);
   const [isToggleOn, setIsToggleOn] = useState(false);
   const [earnedPoin, setEarnedPoin] = useState(0);
+  const [productItems, setProductItems] = useState<ProductItem[]>([{ 
+    productId: '', 
+    quantity: 1,
+    price: 0,
+    subtotal: 0
+  }]);
 
   function handleChange() {
     if (modal) {
@@ -46,7 +58,6 @@ export default function Form({
   }
 
   function resetForm() {
-    setSelectedProduct('');
     setSelectedCustomer('');
     setQuantity(1);
     setTotalPrice(0);
@@ -56,31 +67,29 @@ export default function Form({
     setTotalBayar(0);
     setIsToggleOn(false);
     setEarnedPoin(0);
+    setProductItems([{
+      productId: '',
+      quantity: 1,
+      price: 0,
+      subtotal: 0
+    }]);
   }
 
   useEffect(() => {
-    if (selectedProduct && quantity) {
-      const product = products.find(p => p.id === selectedProduct);
-      if (product) {
-        setTotalPrice(product.price * Number(quantity));
-      }
+    const total = productItems.reduce((sum, item) => sum + item.subtotal, 0);
+    setTotalPrice(total);
+
+    const poinValue = usePoin ? usedPoin * 5000 : 0;
+    const newTotalBayar = total - poinValue;
+    setTotalBayar(newTotalBayar);
+
+    if (!usePoin) {
+      const newEarnedPoin = Math.floor(newTotalBayar / 30000) * 2;
+      setEarnedPoin(newEarnedPoin);
     } else {
-      setTotalPrice(0);
+      setEarnedPoin(0);
     }
-  }, [selectedProduct, quantity, products]);
-
-  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-    
-    if (inputValue === '') {
-      setQuantity('');
-      return;
-    }
-
-    const value = parseInt(inputValue, 10);
-
-    setQuantity(value);
-  };
+  }, [productItems, usePoin, usedPoin]);
 
   useEffect(() => {
     if (selectedCustomer) {
@@ -92,39 +101,16 @@ export default function Form({
   }, [selectedCustomer, customers]);
 
   useEffect(() => {
-    if (selectedProduct && quantity) {
-      const product = products.find(p => p.id === selectedProduct);
-      if (product) {
-        const newTotalPrice = product.price * Number(quantity);
-        setTotalPrice(newTotalPrice);
-        
-        if (usePoin) {
-          const maxPoinAllowed = Math.floor(newTotalPrice / 5000);
-          if (usedPoin > maxPoinAllowed) {
-            setUsedPoin(0);
-          }
-        }
-      }
-    } else {
-      setTotalPrice(0);
-    }
-  }, [selectedProduct, quantity, products, usePoin, usedPoin]);
-
-  useEffect(() => {
     if (totalPrice > 0) {
-      const poinValue = usePoin ? usedPoin * 5000 : 0;
-      const newTotalBayar = totalPrice - poinValue;
-      setTotalBayar(newTotalBayar);
-      
-      if (!usePoin) {
-        const newEarnedPoin = Math.floor(newTotalBayar / 30000) * 2;
-        setEarnedPoin(newEarnedPoin);
-      } else {
+      if (usePoin) {
+        const poinValue = usedPoin * 5000;
+        setTotalBayar(totalPrice - poinValue);
         setEarnedPoin(0);
+      } else {
+        setTotalBayar(totalPrice);
+        const newEarnedPoin = Math.floor(totalPrice / 30000) * 2;
+        setEarnedPoin(newEarnedPoin);
       }
-    } else {
-      setTotalBayar(0);
-      setEarnedPoin(0);
     }
   }, [totalPrice, usePoin, usedPoin]);
 
@@ -165,28 +151,6 @@ export default function Form({
     setTotalBayar(totalPrice - poinValue);
   };
 
-  function SubmitButton() {
-    const { pending } = useFormStatus();
-    
-    return (
-      <button
-        aria-disabled={pending}
-        type="submit"
-        className={`flex h-10 items-center rounded-lg px-4 text-sm font-medium text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 ${
-          pending ? 'bg-red-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-500'
-        }`}
-      >
-        {pending ? (
-          <div className="flex items-center">
-            <span>Memproses...</span>
-          </div>
-        ) : (
-          'Buat Penjualan'
-        )}
-      </button>
-    );
-  }
-
   function CancelButton({ onClick }: { onClick: () => void }) {
     const { pending } = useFormStatus();
     
@@ -206,6 +170,60 @@ export default function Form({
     );
   }
 
+  const addProductItem = () => {
+    setProductItems([...productItems, { 
+      productId: '', 
+      quantity: 1,
+      price: 0,
+      subtotal: 0
+    }]);
+  };
+
+  const removeProductItem = (index: number) => {
+    const newItems = productItems.filter((_, i) => i !== index);
+    setProductItems(newItems);
+    calculateTotal(newItems);
+  };
+
+  const updateProductItem = (index: number, field: keyof ProductItem, value: string | number) => {
+    const newItems = [...productItems];
+    const item = newItems[index];
+
+    if (field === 'productId') {
+      const product = products.find(p => p.id === value);
+      item.productId = value as string;
+      item.price = product?.price || 0;
+      item.subtotal = item.price * item.quantity;
+    } else if (field === 'quantity') {
+      if (value === '') {
+        item.quantity = 0;
+      } else {
+        const numericValue = String(value).replace(/^0+/, '');
+        item.quantity = numericValue === '' ? 0 : Number(numericValue);
+      }
+      item.subtotal = item.price * item.quantity;
+    }
+
+    setProductItems(newItems);
+    calculateTotal(newItems);
+  };
+
+  const calculateTotal = (items: ProductItem[]) => {
+    const total = items.reduce((sum, item) => sum + item.subtotal, 0);
+    setTotalPrice(total);
+    setTotalBayar(total);
+    setEarnedPoin(Math.floor(total / 100000));
+  };
+
+  const handleTogglePoin = () => {
+    const newState = !isToggleOn;
+    setIsToggleOn(newState);
+    setUsePoin(newState);
+    if (!newState) {
+      setUsedPoin(0);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center">
       <button
@@ -223,6 +241,23 @@ export default function Form({
               <form 
                 action={async (formData) => {
                   try {
+                    const invalidItems = productItems.some(
+                      item => !item.productId || item.quantity <= 0
+                    );
+
+                    if (invalidItems) {
+                      toast.error('Pastikan semua produk dipilih dan jumlah item lebih dari 0');
+                      return;
+                    }
+
+                    formData.append('productCount', productItems.length.toString());
+                    
+                    productItems.forEach((item, index) => {
+                      formData.append(`product-${index}`, item.productId);
+                      formData.append(`quantity-${index}`, item.quantity.toString());
+                      formData.append(`price-${index}`, item.price.toString());
+                    });
+
                     if (usePoin && usedPoin > 0) {
                       formData.append('usedPoin', usedPoin.toString());
                     }
@@ -319,53 +354,89 @@ export default function Form({
                   </div>
 
                   <div className="mb-4">
-                    <label htmlFor="product" className="mb-2 block text-sm font-medium">
-                      Pilih Produk
+                    <label className="mb-2 block text-sm font-medium">
+                      Produk
                     </label>
-                    <div className="relative">
-                      <select
-                        id="product"
-                        name="productId"
-                        className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                        defaultValue=""
-                        onChange={(e) => setSelectedProduct(e.target.value)}
-                        required
-                      >
-                        <option value="" disabled>
-                          Pilih produk
-                        </option>
-                        {products.map((product) => (
-                          <option key={product.id} value={product.id}>
-                            {product.name} - {formatCurrency(product.price)}
-                          </option>
-                        ))}
-                      </select>
-                      <ArchiveBoxIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
-                    </div>
-                  </div>
+                    {productItems.map((item, index) => {
+                      const availableProducts = products.filter(
+                        product => !productItems.some(
+                          (item, i) => i !== index && item.productId === product.id
+                        )
+                      );
 
-                  <div className="mb-4">
-                    <label htmlFor="quantity" className="mb-2 block text-sm font-medium">
-                      Jumlah Item
-                    </label>
-                    <div className="relative mt-2 rounded-md">
-                      <div className="relative">
-                        <input
-                          id="quantity"
-                          name="quantity"
-                          type="number"
-                          min="1"
-                          step="1"
-                          value={quantity}
-                          onChange={handleQuantityChange}
-                          pattern="[1-9]*"
-                          placeholder="Masukkan jumlah"
-                          className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                          required
-                        />
-                        <ArchiveBoxIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
-                      </div>
-                    </div>
+                      return (
+                        <div key={index} className="px-4 py-2 bg-gray-50 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="flex-1">
+                              <select
+                                name={`product-${index}`}
+                                value={item.productId}
+                                onChange={(e) => updateProductItem(index, 'productId', e.target.value)}
+                                className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                              >
+                                <option value="">Pilih produk</option>
+                                {availableProducts.map((product) => (
+                                  <option key={product.id} value={product.id}>
+                                    {product.name} - {formatCurrency(product.price)}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div className="flex items-center">
+                              <button
+                                type="button"
+                                onClick={() => updateProductItem(index, 'quantity', item.quantity - 1)}
+                                className="h-10 w-10 rounded-l-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-100"
+                              >
+                                -
+                              </button>
+                              <input
+                                type="number"
+                                value={item.quantity === 0 ? '' : item.quantity}
+                                onChange={(e) => updateProductItem(index, 'quantity', e.target.value)}
+                                className="h-10 w-20 border-y border-gray-200 text-center text-sm [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => updateProductItem(index, 'quantity', item.quantity + 1)}
+                                className="h-10 w-10 rounded-r-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-100"
+                              >
+                                +
+                              </button>
+                            </div>
+
+                            {productItems.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeProductItem(index)}
+                                className="rounded-lg border border-red-200 p-2 text-red-500 hover:bg-red-50"
+                              >
+                                <TrashIcon className="w-5 h-5" />
+                              </button>
+                            )}
+                          </div>
+
+                          {item.productId && (
+                            <div className="mt-2 text-sm text-gray-500">
+                              Subtotal: {formatCurrency(item.subtotal)}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {productItems[productItems.length - 1].productId && 
+                     products.length > productItems.length && (
+                      <button
+                        type="button"
+                        onClick={addProductItem}
+                        className="mt-2 flex items-center gap-1 rounded-lg border border-blue-600 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50"
+                      >
+                        <PlusIcon className="w-4 h-4" />
+                        Tambah Produk
+                      </button>
+                    )}
                   </div>
 
                   <div className="mb-4">
@@ -387,22 +458,14 @@ export default function Form({
                     </div>
                   </div>
 
-                  {selectedProduct && selectedCustomer && customerPoin > 0 && totalPrice > 0 && (
+                  {selectedCustomer && customerPoin > 0 && (
                     <div className="mb-4">
                       <div className="flex items-center space-x-2">
                         <label className="text-sm font-medium">
                           Gunakan Poin (Tersedia: {customerPoin})
                         </label>
                         <div 
-                          onClick={() => {
-                            const newState = !isToggleOn;
-                            setIsToggleOn(newState);
-                            setUsePoin(newState);
-                            if (!newState) {
-                              setUsedPoin(0);
-                              setTotalBayar(totalPrice);
-                            }
-                          }}
+                          onClick={handleTogglePoin}
                           className="relative inline-block w-12 cursor-pointer"
                         >
                           <div className={`w-12 h-6 rounded-full transition-colors duration-200 ease-in-out ${
@@ -417,7 +480,7 @@ export default function Form({
                     </div>
                   )}
 
-                  {isToggleOn && selectedProduct && selectedCustomer && customerPoin > 0 && totalPrice > 0 && (
+                  {isToggleOn && selectedCustomer && customerPoin > 0 && (
                     <div className="mb-4">
                       <label htmlFor="poin" className="mb-2 block text-sm font-medium">
                         Jumlah Poin yang Digunakan (Tersedia: {customerPoin})
@@ -479,7 +542,17 @@ export default function Form({
                 </div>
                 <div className="sticky bottom-0 flex justify-end gap-4 bg-white p-4 rounded-b-xl">
                   <CancelButton onClick={handleChange} />
-                  <SubmitButton />
+                  <button
+                    type="submit"
+                    disabled={productItems.some(item => !item.productId || item.quantity <= 0)}
+                    className={`flex h-10 items-center rounded-lg px-4 text-sm font-medium text-white transition-colors
+                      ${productItems.some(item => !item.productId || item.quantity <= 0)
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-red-600 hover:bg-red-500'
+                      }`}
+                  >
+                    Buat Penjualan
+                  </button>
                 </div>
               </form>
             </div>

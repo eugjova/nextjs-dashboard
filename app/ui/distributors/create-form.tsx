@@ -38,7 +38,6 @@ export default function Form() {
 
   async function createDistributors(formData: FormData) {
     console.log('FormData received:', Object.fromEntries(formData.entries()));
-    // Lakukan proses lainnya...
   }
 
   return (

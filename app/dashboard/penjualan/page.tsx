@@ -16,8 +16,6 @@ import {
 } from '@/app/ui/skeletons'; 
 import { Metadata } from 'next';
 import Form from '@/app/ui/penjualan/create-form';
-import { CreatePenjualan } from '@/app/ui/penjualan/buttons';
-import { products } from '@/app/lib/placeholder-data';
 
 export const metadata: Metadata = {
   title: 'Penjualan',
@@ -32,7 +30,6 @@ export default async function Page({
   const query = params?.query || '';
   const currentPage = Number(params?.page) || 1;
   
-  // Fetch data yang diperlukan
   const customers = await fetchCustomers();
   const products = await fetchProducts();
   const productsWithDistributor = products.map(product => ({

@@ -1,7 +1,5 @@
-// Definisikan format tanggal yang akan digunakan
 const CURRENT_DATE = new Date().toISOString().split('T')[0];
 
-// Gunakan data roles yang sudah ada
 const roles = [
   {
     id: '410544b2-4001-4271-9855-fec4b6a6442a',
@@ -13,7 +11,6 @@ const roles = [
   },
 ];
 
-// Gunakan data customers yang sudah ada
 const customers = [
   {
     id: 'c0bb2f49-2c17-43e6-903d-ba200735bd4d',
@@ -117,7 +114,6 @@ const customers = [
   },
 ];
 
-// Gunakan data distributors yang sudah ada
 const distributors = [
   {
     id: '43893c55-36c4-461e-bea3-f29c05f1af59',
@@ -191,7 +187,6 @@ const distributors = [
   },
 ];
 
-// Gunakan data pegawai yang sudah ada
 const pegawai = [
   {
     id: 'c972a1fd-a7fe-4abe-82b1-ef3af5b45d23',
@@ -215,10 +210,8 @@ const pegawai = [
     email: 'sarah@nextmail.com',
     password: '234567',
   },
-  // ... lanjutkan dengan 8 pegawai lainnya
 ];
 
-// Gunakan data products yang sudah ada
 const products = [
   {
     id: 'e45f3577-c34d-4b27-b5c3-345ab825445b',
@@ -240,80 +233,92 @@ const products = [
     updatedAt: CURRENT_DATE,
     image_url: '/products/ramen.png',
   },
-  // ... lanjutkan dengan 2 produk lainnya
 ];
 
-// Sesuaikan data penjualan dengan struktur baru
 const penjualan = [
   {
-    id: '827c5f4e-c8a3-4d96-8c6e-d5ae28f1823e',
-    date: '2023-01-09',
-    id_produk: products[0].id,
-    customerId: customers[0].id,
-    id_pegawai: pegawai[0].id,
-    jumlah: 1,
-    total: 30000,
-    poin: customers[0].poin,
-    total_bayar: 30000,
+    id: '3958dc9e-712f-4377-85e9-fec4b6a6442a',
+    customerId: 'c0bb2f49-2c17-43e6-903d-ba200735bd4d',
+    pegawaiId: 'c972a1fd-a7fe-4abe-82b1-ef3af5b45d23',
+    date: '2024-01-01',
     poin_used: 0,
-    poin_earned: 0,
-  },
-  // ... data penjualan lainnya yang sudah ada
+    total_amount: 150000,
+    total_bayar: 150000,
+  }
 ];
 
-// Gunakan data pembelian yang sudah ada
+const penjualan_items = [
+  {
+    id: '3958dc9e-787f-4377-85e9-fec4b6a6442a',
+    penjualan_id: '3958dc9e-712f-4377-85e9-fec4b6a6442a',
+    product_id: 'e45f3577-c34d-4b27-b5c3-345ab825445b',
+    quantity: 2,
+    price_per_item: 50000,
+    subtotal: 100000,
+  },
+  {
+    id: '3958dc9e-792f-4377-85e9-fec4b6a6442a',
+    penjualan_id: '3958dc9e-712f-4377-85e9-fec4b6a6442a',
+    product_id: 'a84b6488-4e09-4251-9b2f-784b4584944b',
+    quantity: 1,
+    price_per_item: 50000,
+    subtotal: 50000,
+  }
+];
+
 const pembelian = [
   {
-    id: '90a3f2dc-a82f-4a18-8f1b-4d3e2eb9a2e4',
-    id_pegawai: pegawai[0].name,
-    id_distributor: distributors[0].name,
-    jumlah: 50,
-    total: 2000000,
-    date: '2023-01-11',
+    id: '3958dc9e-797f-4377-85e9-fec4b6a6442a',
+    date: '2024-01-01',
+    pegawaiId: 'c972a1fd-a7fe-4abe-82b1-ef3af5b45d23',
+    distributorId: '43893c55-36c4-461e-bea3-f29c05f1af59',
+    jumlah: 10,
+    total: 1000000,
   },
-  // ... data pembelian lainnya yang sudah ada
+  {
+    id: '3958dc9e-737f-4377-85e9-fec4b6a6442b',
+    date: '2024-01-02',
+    pegawaiId: '554e03c1-5939-4f83-90ec-a5ecd796a1c8',
+    distributorId: '946dcd2a-c2af-4bef-8f09-513326334a05',
+    jumlah: 15,
+    total: 1500000,
+  },
+  {
+    id: '76d65c26-f784-44a6-8ce0-e7835d433f80',
+    date: '2024-01-03',
+    pegawaiId: 'c972a1fd-a7fe-4abe-82b1-ef3af5b45d23',
+    distributorId: 'f912183f-9774-40ea-9c3f-07a79c25c8d0',
+    jumlah: 20,
+    total: 2000000,
+  },
+  {
+    id: '9f486c52-ea3b-4fd5-9268-ac27238944ab',
+    date: '2024-01-04',
+    pegawaiId: '554e03c1-5939-4f83-90ec-a5ecd796a1c8',
+    distributorId: '5718509a-d12e-4169-a438-9440e00bee17',
+    jumlah: 12,
+    total: 1200000,
+  },
+  {
+    id: 'c5b8d137-41c4-4e9c-9e34-0d64f3f2cd9d',
+    date: '2024-01-05',
+    pegawaiId: 'c972a1fd-a7fe-4abe-82b1-ef3af5b45d23',
+    distributorId: 'da848c31-eab7-4446-b8eb-4b1b295cb131',
+    jumlah: 8,
+    total: 800000,
+  }
 ];
 
-// Gunakan data stock yang sudah ada
 const stock = [
   {
     id: 'a3b8e5c7-2d9f-46e1-9f6a-8b2d7c5e9a1f',
     id_produk: products[0].id,
     jumlah: 50,
   },
-  // ... data stock lainnya yang sudah ada
 ];
 
-// Gunakan data DetailTransaksiPenjualan yang sudah ada
-const DetailTransaksiPenjualan = [
-  {
-    id: 'e6f9a3b4-1c2d-45e8-a7f0-bc8d1e4f9a2b',
-    id_penjualan: penjualan[0].id,
-    id_produk: products[0].id,
-    jumlah: 1,
-    harga: products[0].price,
-    date: '2024-09-16',
-  },
-  // ... data DetailTransaksiPenjualan lainnya yang sudah ada
-];
-
-// Gunakan data DetailTransaksiPembelian yang sudah ada
-const DetailTransaksiPembelian = [
-  {
-    id: 'e7bfbedd-025b-465b-a963-58b6672379a2',
-    id_pembelian: pembelian[0].id,
-    distributorId: distributors[0].id,
-    jumlah: 10,
-    total_biaya_transaksi: 200000,
-    date: '2024-09-16',
-  },
-  // ... data DetailTransaksiPembelian lainnya yang sudah ada
-];
-
-// Gunakan data revenue yang sudah ada
 const revenue = [
   { month: 'Jan', revenue: 2000 },
-  // ... data revenue lainnya yang sudah ada
 ];
 
 module.exports = {
@@ -323,9 +328,8 @@ module.exports = {
   pegawai,
   products,
   penjualan,
+  penjualan_items,
   pembelian,
   stock,
-  DetailTransaksiPenjualan,
-  DetailTransaksiPembelian,
   revenue,
 };

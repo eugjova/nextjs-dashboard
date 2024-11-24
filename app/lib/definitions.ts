@@ -1,31 +1,12 @@
 export type PenjualanTable = {
   id: string;
   date: string;
-  nama_produk: string;
   nama_customer: string;
   nama_pegawai: string;
-  jumlah: number;
-  total: number;
+  total_items: number;
+  total_amount: number;
   total_bayar: number;
-  poin: number;
-};
-
-export type DetailTransaksiPenjualanTable = {
-  id: string;
-  id_penjualan: string;
-  id_produk: string;
-  jumlah: number;
-  harga: number;
-  date: string;
-};
-
-export type DetailTransaksiPembelianTable = {
-  id: string;
-  id_pembelian: string;
-  distributorId: string;
-  jumlah: number;
-  total_biaya_transaksi: number;
-  date: string;
+  poin_used: number;
 };
 
 export type CustomerField = {
@@ -91,12 +72,13 @@ export type LatestCustomer = {
 export type PenjualanForm = {
   id: string;
   date: string;
-  id_produk: string;
   customerId: string;
-  id_pegawai: string;
-  jumlah: number;
-  total: number;
-  poin: number;
+  pegawaiId: string;
+  total_amount: number;
+  total_bayar: number;
+  poin_used: number;
+  customer_name?: string;
+  pegawai_name?: string;
 };
 
 export type LatestPenjualanRaw = {
@@ -189,4 +171,3 @@ export type FormattedCustomersTable = {
   createdAt: string;
   updatedAt: string;
 };
-

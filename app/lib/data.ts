@@ -1,3 +1,5 @@
+'use server';
+
 import { sql } from '@vercel/postgres';
 import {
   CustomerField,
@@ -22,10 +24,8 @@ import {
 } from './definitions';
 import { unstable_noStore as noStore } from 'next/cache';
 import { formatCurrency } from './utils';
-
 import { distributors, penjualan, products, } from './placeholder-data';
 import { error } from 'console';
-
 
 export async function fetchRevenue() {
   // Add noStore() here to prevent the response from being cached.
@@ -115,25 +115,31 @@ export async function fetchFilteredPenjualan(query: string, currentPage: number)
 
   try {
     const data = await sql<PenjualanTable>`
+      WITH PenjualanItems AS (
+        SELECT 
+          penjualan_id,
+          SUM(quantity) as total_items,
+          SUM(subtotal) as total_subtotal
+        FROM penjualan_items
+        GROUP BY penjualan_id
+      )
       SELECT
-        penjualan.id,
-        penjualan.date,
-        products.name as nama_produk,
-        customers.name as nama_customer,
-        pegawai.name as nama_pegawai,
-        penjualan.jumlah,
-        penjualan.total,
-        penjualan.total_bayar,
-        penjualan.poin
-      FROM penjualan
-      JOIN products ON penjualan.id_produk = products.id
-      JOIN customers ON penjualan.customerId = customers.id
-      JOIN pegawai ON penjualan.id_pegawai = pegawai.id
+        p.id,
+        p.date,
+        c.name as nama_customer,
+        peg.name as nama_pegawai,
+        COALESCE(pi.total_items, 0) as total_items,
+        p.total_amount,
+        p.total_bayar,
+        p.poin_used
+      FROM penjualan p
+      JOIN customers c ON p.customerId = c.id
+      JOIN pegawai peg ON p.pegawaiId = peg.id
+      LEFT JOIN PenjualanItems pi ON p.id = pi.penjualan_id
       WHERE
-        products.name ILIKE ${`%${query}%`} OR
-        customers.name ILIKE ${`%${query}%`} OR
-        pegawai.name ILIKE ${`%${query}%`}
-      ORDER BY penjualan.date DESC
+        c.name ILIKE ${`%${query}%`} OR
+        peg.name ILIKE ${`%${query}%`}
+      ORDER BY p.date DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
 
@@ -148,15 +154,13 @@ export async function fetchPenjualanPages(query: string) {
   noStore();
   try {
     const count = await sql`
-      SELECT COUNT(*)
-      FROM penjualan
-      JOIN products ON penjualan.id_produk = products.id
-      JOIN customers ON penjualan.customerId = customers.id
-      JOIN pegawai ON penjualan.id_pegawai = pegawai.id
+      SELECT COUNT(DISTINCT p.id)
+      FROM penjualan p
+      JOIN customers c ON p.customerId = c.id
+      JOIN pegawai peg ON p.pegawaiId = peg.id
       WHERE
-        products.name ILIKE ${`%${query}%`} OR
-        customers.name ILIKE ${`%${query}%`} OR
-        pegawai.name ILIKE ${`%${query}%`}
+        c.name ILIKE ${`%${query}%`} OR
+        peg.name ILIKE ${`%${query}%`}
     `;
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
@@ -172,22 +176,26 @@ export async function fetchPenjualanById(id: string) {
   try {
     const data = await sql<PenjualanForm>`
       SELECT
-        invoices.id,
-        invoices.customer_id,
-        invoices.amount,
-        invoices.status
-      FROM in
-      WHERE penjualan.id = ${id};
+        p.id,
+        p.date,
+        p.customerId,
+        p.pegawaiId,
+        p.total_amount,
+        p.total_bayar,
+        p.poin_used,
+        c.name as customer_name,
+        peg.name as pegawai_name
+      FROM penjualan p
+      JOIN customers c ON p.customerId = c.id
+      JOIN pegawai peg ON p.pegawaiId = peg.id
+      WHERE p.id = ${id}
     `;
 
-    const penjualan = data.rows.map((penjualan) => ({
-      ...penjualan,
-      // Convert amount from cents to dollars
-      total : penjualan.total / 100,
-    }));
-    
-    console.log(penjualan); // Invoice is an empty array []
-    return penjualan[0];
+    if (!data.rows[0]) {
+      throw new Error('Penjualan not found');
+    }
+
+    return data.rows[0];
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch penjualan.');
@@ -562,9 +570,9 @@ export async function fetchProductsById(id: string) {
       WHERE id = ${id};
     `;
 
-    const product = data.rows[0]; // Directly access the first row
+    const product = data.rows[0];
 
-    console.log(product); // Log the product object
+    console.log(product);
     return product;
   } catch (error) {
     console.error('Database Error:', error);
@@ -572,11 +580,6 @@ export async function fetchProductsById(id: string) {
   }
 }
 
-
-
- 
- 
- 
 export async function getPegawai(email: string) {
   noStore();
   try {
@@ -607,6 +610,93 @@ export async function fetchPegawai() {
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch all pegawai.');
+  }
+}
+
+export async function fetchFilteredPembelian(query: string, currentPage: number) {
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  try {
+    const pembelian = await sql`
+      SELECT 
+        p.id,
+        p.date,
+        p.jumlah,
+        p.total,
+        peg.name as nama_pegawai,
+        d.name as nama_distributor
+      FROM pembelian p
+      JOIN pegawai peg ON p.pegawaiId = peg.id
+      JOIN distributors d ON p.distributorId = d.id
+      WHERE
+        peg.name ILIKE ${`%${query}%`} OR
+        d.name ILIKE ${`%${query}%`}
+      ORDER BY p.date DESC
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+    `;
+    return pembelian.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch pembelian data.');
+  }
+}
+
+export async function fetchPembelianPages(query: string) {
+  try {
+    const count = await sql`
+      SELECT COUNT(*)
+      FROM pembelian p
+      JOIN pegawai peg ON p.pegawaiId = peg.id
+      JOIN distributors d ON p.distributorId = d.id
+      WHERE
+        peg.name ILIKE ${`%${query}%`} OR
+        d.name ILIKE ${`%${query}%`}
+    `;
+
+    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total pages.');
+  }
+}
+
+export async function fetchPenjualanItems(penjualanId: string) {
+  try {
+    const items = await sql`
+      SELECT 
+        pi.*,
+        p.name as nama_produk
+      FROM penjualan_items pi
+      JOIN products p ON pi.product_id = p.id
+      WHERE pi.penjualan_id = ${penjualanId}
+      ORDER BY pi.id ASC
+    `;
+    return items.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch penjualan items.');
+  }
+}
+
+export async function getPenjualanItems(id: string) {
+  try {
+    const items = await sql`
+      SELECT 
+        pi.id,
+        pi.quantity,
+        pi.price_per_item,
+        pi.subtotal,
+        p.name as nama_produk
+      FROM penjualan_items pi
+      JOIN products p ON pi.product_id = p.id
+      WHERE pi.penjualan_id = ${id}
+      ORDER BY pi.id ASC
+    `;
+    return items.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch penjualan items.');
   }
 }
 

@@ -4,9 +4,9 @@ import Table from '@/app/ui/pembelian/table';
 import { oswald } from '@/app/ui/fonts';
 import { Suspense } from 'react';
 import { 
-  fetchPenjualanPages, 
-  fetchCustomers, 
-  fetchProducts, 
+  fetchPembelianPages, 
+  fetchPegawai,
+  fetchDistributor,
 } from '@/app/lib/data';
 import {
   SearchSkeleton,
@@ -15,7 +15,6 @@ import {
 } from '@/app/ui/skeletons'; 
 import { Metadata } from 'next';
 import Form from '@/app/ui/pembelian/create-form';
-import { distributors, pegawai } from '@/app/lib/placeholder-data';
 
 export const metadata: Metadata = {
   title: 'Pembelian',
@@ -29,18 +28,23 @@ export default async function Page({
   const params = await Promise.resolve(searchParams);
   const query = params?.query || '';
   const currentPage = Number(params?.page) || 1;
-  const customers = await fetchCustomers();
-  const products = await fetchProducts();
- 
+  
+  const pegawai = await fetchPegawai();
+  const distributors = await fetchDistributor();
+  const totalPages = await fetchPembelianPages(query);
+
   return (
     <div className="flex min-h-screen flex-col">
       <p className={`${oswald.variable} text-3xl text-white`}>Pembelian Page</p>
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
         <Suspense fallback={<SearchSkeleton />}>
-          <Search placeholder="Search Pembelian..." />
+          <Search placeholder="Search pembelian..." />
         </Suspense>
         <Suspense fallback={<CreateSkeleton />}>
-          <Form pegawai={pegawai} distributors={distributors}/>
+          <Form 
+            pegawai={pegawai}
+            distributors={distributors}
+          />
         </Suspense>
       </div>
 
@@ -51,7 +55,7 @@ export default async function Page({
       </div>
 
       <div className="mt-5 flex w-full justify-center">
-        {/* <Pagination totalPages={totalPages} /> */}
+        <Pagination totalPages={totalPages} />
       </div>
     </div>
   );

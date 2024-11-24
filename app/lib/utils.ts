@@ -33,26 +33,18 @@ export const generateYAxis = (revenue: Revenue[]) => {
 };
 
 export const generatePagination = (currentPage: number, totalPages: number) => {
-  // Jika total halaman 7 atau kurang
-  // [1, 2, 3, 4, 5, 6, 7]
   if (totalPages <= 7) {
     return Array.from({ length: totalPages }, (_, i) => i + 1);
   }
 
-  // Jika halaman saat ini di dekat awal
-  // [1, 2, 3, ..., 7, 8, 9]
   if (currentPage <= 3) {
     return [1, 2, 3, '...', totalPages - 2, totalPages - 1, totalPages];
   }
 
-  // Jika halaman saat ini di dekat akhir
-  // [1, 2, 3, ..., 7, 8, 9]
   if (currentPage >= totalPages - 2) {
     return [1, 2, 3, '...', totalPages - 2, totalPages - 1, totalPages];
   }
 
-  // Jika halaman saat ini di tengah
-  // [1, 2, ..., 4, 5, 6, ..., 8, 9]
   return [
     1,
     '...',

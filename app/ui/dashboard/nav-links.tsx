@@ -1,28 +1,28 @@
 'use client';
 
 import {
-  UserGroupIcon,
   HomeIcon,
-  DocumentDuplicateIcon,
-  ShoppingCartIcon,
-  CreditCardIcon,
+  UserGroupIcon,
+  BuildingStorefrontIcon,
+  UsersIcon,
+  ShoppingBagIcon,
+  ArrowUpOnSquareIcon,
+  ArrowDownOnSquareIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 
+
 // Map of links to display in the side navigation.
-// Depending on the size of the application, this would be stored in a database.
 const links = [
   { name: 'Home', href: '/dashboard', icon: HomeIcon },
-  { name: 'Products', href: '/dashboard/products', icon: ShoppingCartIcon },
-  { name: 'Pegawai', href: '/dashboard/pegawai', icon: UserGroupIcon },
+  { name: 'Products', href: '/dashboard/products', icon: ShoppingBagIcon },
+  { name: 'Pegawai', href: '/dashboard/pegawai', icon: UsersIcon },
   { name: 'Customers', href: '/dashboard/customers', icon: UserGroupIcon },
-  { name: 'Distributor', href: '/dashboard/distributors', icon: UserGroupIcon },
-  { name: 'Penjualan', href: '/dashboard/penjualan', icon: CreditCardIcon ,},
-  { name: 'Pembelian', href: '/dashboard/pembelian', icon: CreditCardIcon ,},
-  { name: 'Detail Transaksi Penjualan', href: '/dashboard/detailpenjualan', icon: DocumentDuplicateIcon },
-  { name: 'Detail Transaksi Pembelian', href: '/dashboard/detailpembelian', icon: DocumentDuplicateIcon },
+  { name: 'Distributor', href: '/dashboard/distributors', icon: BuildingStorefrontIcon },
+  { name: 'Penjualan', href: '/dashboard/penjualan', icon: ArrowUpOnSquareIcon },
+  { name: 'Pembelian', href: '/dashboard/pembelian', icon: ArrowDownOnSquareIcon },
 ];
 
 type NavLinksProps = {

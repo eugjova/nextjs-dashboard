@@ -10,10 +10,9 @@ const {
   revenue,
   products,
   penjualan,
+  penjualan_items,
   pembelian,
   stock,
-  DetailTransaksiPenjualan,
-  DetailTransaksiPembelian
 } = require('../app/lib/placeholder-data.js');
 
  
@@ -21,7 +20,6 @@ async function seedRoles(client) {
   try {
     await client.sql`DROP TABLE IF EXISTS roles`;
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
-    // Create the "roles" table if it doesn't exist
     const createTable = await client.sql`
       CREATE TABLE IF NOT EXISTS roles (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -31,7 +29,6 @@ async function seedRoles(client) {
 
     console.log(`Created "roles" table`);
 
-    // Insert data into the "roles" table
     const insertedUsers = await Promise.all(
       roles.map(async (roles) => {
         return client.sql`
@@ -58,7 +55,6 @@ async function seedCustomers(client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
  
-    // Create the "customers" table if it doesn't exist
     const createTable = await client.sql`
       CREATE TABLE IF NOT EXISTS customers (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -76,7 +72,6 @@ async function seedCustomers(client) {
  
     const currentDate = formatDate(new (Date))
  
-    // Insert data into the "customers" table
     const insertedCustomers = await Promise.all(
       customers.map(
         (customer) => client.sql`
@@ -104,7 +99,6 @@ async function seedPegawai(client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
  
-    // Create the "customers" table if it doesn't exist
     const createTable = await client.sql`
       CREATE TABLE IF NOT EXISTS pegawai (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -121,7 +115,6 @@ async function seedPegawai(client) {
  
     console.log(`Created "pegawai" table`);
  
-    // Insert data into the "customers" table
     const insertedPegawai = await Promise.all(
       pegawai.map(async (pegawai) => {
         if (!pegawai.email) {
@@ -152,7 +145,6 @@ async function seedDistributors(client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
  
-    // Create the "customers" table if it doesn't exist
     const createTable = await client.sql`
       CREATE TABLE IF NOT EXISTS distributors (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -165,7 +157,6 @@ async function seedDistributors(client) {
  
     console.log(`Created "distributors" table`);
  
-    // Insert data into the "customers" table
     const insertedDistributors = await Promise.all(
       distributors.map(
         (distributor) => client.sql`
@@ -240,63 +231,68 @@ async function seedProducts(client) {
  
 async function seedPenjualan(client) {
   try {
-    await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
- 
-    // Drop tabel jika sudah ada
-    await client.sql`DROP TABLE IF EXISTS penjualan CASCADE`;
- 
-    const createTable = await client.sql`
-      CREATE TABLE IF NOT EXISTS penjualan (
-        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-        date DATE NOT NULL,
-        id_produk UUID NOT NULL REFERENCES products(id),
-        customerId UUID NOT NULL REFERENCES customers(id),
-        id_pegawai UUID NOT NULL REFERENCES pegawai(id),
-        jumlah INT NOT NULL,
-        total INT NOT NULL,
-        total_bayar INT NOT NULL,
-        poin INT NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-    `;
+    await client.sql`CREATE TABLE IF NOT EXISTS penjualan (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      customerId UUID NOT NULL,
+      pegawaiId UUID NOT NULL,
+      date DATE NOT NULL,
+      poin_used INTEGER NOT NULL DEFAULT 0,
+      total_amount INTEGER NOT NULL,
+      total_bayar INTEGER NOT NULL,
+      FOREIGN KEY (customerId) REFERENCES customers(id),
+      FOREIGN KEY (pegawaiId) REFERENCES pegawai(id)
+    );`;
 
-    console.log(`Created "penjualan" table`);
-    
+    await client.sql`CREATE TABLE IF NOT EXISTS penjualan_items (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      penjualan_id UUID NOT NULL,
+      product_id UUID NOT NULL,
+      quantity INTEGER NOT NULL,
+      price_per_item INTEGER NOT NULL,
+      subtotal INTEGER NOT NULL,
+      FOREIGN KEY (penjualan_id) REFERENCES penjualan(id),
+      FOREIGN KEY (product_id) REFERENCES products(id)
+    );`;
+
     const insertedPenjualan = await Promise.all(
-      penjualan.map(
-        (penjualan) => client.sql`
-        INSERT INTO penjualan (
-          id,
-          date,
-          id_produk,
-          customerId,
-          id_pegawai,
-          jumlah,
-          total,
-          total_bayar,
-          poin
-        )
-        VALUES (
-          ${penjualan.id},
-          ${penjualan.date},
-          ${penjualan.id_produk},
-          ${penjualan.customerId},
-          ${penjualan.id_pegawai},
-          ${penjualan.jumlah},
-          ${penjualan.total},
-          ${penjualan.total_bayar || penjualan.total},
-          ${penjualan.poin}
-        )
-        ON CONFLICT (id) DO NOTHING;
-      `,
-      ),
+      penjualan.map(async (penjualan) => {
+        return client.sql`
+          INSERT INTO penjualan (
+            id, customerId, pegawaiId, date, poin_used, total_amount, total_bayar
+          )
+          VALUES (
+            ${penjualan.id}, ${penjualan.customerId}, ${penjualan.pegawaiId},
+            ${penjualan.date}, ${penjualan.poin_used}, ${penjualan.total_amount},
+            ${penjualan.total_bayar}
+          )
+          ON CONFLICT (id) DO NOTHING;
+        `;
+      })
     );
 
+    const insertedItems = await Promise.all(
+      penjualan_items.map(async (item) => {
+        return client.sql`
+          INSERT INTO penjualan_items (
+            id, penjualan_id, product_id, quantity, price_per_item, subtotal
+          )
+          VALUES (
+            ${item.id}, ${item.penjualan_id}, ${item.product_id},
+            ${item.quantity}, ${item.price_per_item}, ${item.subtotal}
+          )
+          ON CONFLICT (id) DO NOTHING;
+        `;
+      })
+    );
+
+    console.log(`Created "penjualan" and "penjualan_items" tables`);
     console.log(`Seeded ${insertedPenjualan.length} penjualan`);
+    console.log(`Seeded ${insertedItems.length} penjualan items`);
 
     return {
-      createTable,
+      createTable: true,
       penjualan: insertedPenjualan,
+      items: insertedItems,
     };
   } catch (error) {
     console.error('Error seeding penjualan:', error);
@@ -308,24 +304,41 @@ async function seedPembelian(client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
  
-    // Create the "products" table if it doesn't exist
+    await client.sql`DROP TABLE IF EXISTS pembelian CASCADE`;
+ 
     const createTable = await client.sql`
       CREATE TABLE IF NOT EXISTS pembelian (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+        date DATE NOT NULL,
+        pegawaiId UUID NOT NULL REFERENCES pegawai(id),
+        distributorId UUID NOT NULL REFERENCES distributors(id),
         jumlah INT NOT NULL,
         total INT NOT NULL,
-        date DATE NOT NULL
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `;
  
     console.log(`Created "pembelian" table`);
  
-    // Insert data into the "products" table
     const insertedPembelian = await Promise.all(
       pembelian.map(
         (pembelian) => client.sql`
-        INSERT INTO pembelian (id, jumlah, total, date)
-        VALUES (${pembelian.id}, ${pembelian.jumlah}, ${pembelian.total},  ${pembelian.date})
+        INSERT INTO pembelian (
+          id, 
+          date,
+          pegawaiId,
+          distributorId,
+          jumlah, 
+          total
+        )
+        VALUES (
+          ${pembelian.id}, 
+          ${pembelian.date},
+          ${pembelian.pegawaiId},
+          ${pembelian.distributorId},
+          ${pembelian.jumlah}, 
+          ${pembelian.total}
+        )
         ON CONFLICT (id) DO NOTHING;
       `,
       ),
@@ -335,7 +348,7 @@ async function seedPembelian(client) {
  
     return {
       createTable,
-      pembelian : insertedPembelian,
+      pembelian: insertedPembelian,
     };
   } catch (error) {
     console.error('Error seeding pembelian:', error);
@@ -348,7 +361,6 @@ async function seedStock(client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
  
-    // Create the "products" table if it doesn't exist
     const createTable = await client.sql`
       CREATE TABLE IF NOT EXISTS stock (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -359,7 +371,6 @@ async function seedStock(client) {
  
     console.log(`Created "stock" table`);
  
-    // Insert data into the "products" table
     const insertedStock = await Promise.all(
       stock.map(
         (stock) => client.sql`
@@ -381,144 +392,9 @@ async function seedStock(client) {
     throw error;
   }
 }
-
-async function seedDetailTransaksiPembelian(client) {
-  try {
-    await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
- 
-    const createTable = await client.sql`
-      CREATE TABLE IF NOT EXISTS DetailTransaksiPembelian (
-        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-        id_pembelian UUID NOT NULL,
-        distributorId UUID NOT NULL,
-        jumlah INT NOT NULL,
-        total_biaya_transaksi INT NOT NULL,
-        date DATE NOT NULL
-      );
-    `;
- 
-    console.log(`Created "DetailtransaksiPembelian" table`);
-   
-    const insertedDetailTransaksiPembelian = await Promise.all(
-      DetailTransaksiPembelian.map(
-        (DetailTransaksiPembelian) => {
-          // Pastikan jumlah dan total_biaya_transaksi adalah number yang valid
-          const jumlah = Number(DetailTransaksiPembelian.jumlah);
-          const total_biaya_transaksi = Number(DetailTransaksiPembelian.total_biaya_transaksi);
-
-          // Validasi untuk memastikan nilai yang valid
-          if (isNaN(jumlah) || isNaN(total_biaya_transaksi)) {
-            console.error('Invalid data:', DetailTransaksiPembelian);
-            throw new Error('Invalid jumlah or total_biaya_transaksi value');
-          }
-
-          return client.sql`
-            INSERT INTO DetailtransaksiPembelian (
-              id, 
-              id_pembelian, 
-              distributorId, 
-              jumlah, 
-              total_biaya_transaksi, 
-              date
-            )
-            VALUES (
-              ${DetailTransaksiPembelian.id}, 
-              ${DetailTransaksiPembelian.id_pembelian}, 
-              ${DetailTransaksiPembelian.distributorId}, 
-              ${jumlah}, 
-              ${total_biaya_transaksi}, 
-              ${DetailTransaksiPembelian.date}
-            )
-            ON CONFLICT (id) DO NOTHING;
-          `;
-        }
-      ),
-    );
- 
-    console.log(`Seeded ${insertedDetailTransaksiPembelian.length} DetailtransaksiPembelian`);
- 
-    return {
-      createTable,
-      DetailTransaksiPembelian: insertedDetailTransaksiPembelian,
-    };
-  } catch (error) {
-    console.error('Error seeding : Detailtransaksipembelian', error);
-    throw error;
-  }
-}
-
-async function seedDetailTransaksiPenjualan(client) {
-  try {
-    await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
- 
-    const createTable = await client.sql`
-      CREATE TABLE IF NOT EXISTS DetailTransaksiPenjualan (
-        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-        id_penjualan UUID NOT NULL REFERENCES penjualan(id),
-        id_produk UUID NOT NULL REFERENCES products(id),
-        jumlah INT NOT NULL,
-        harga INT NOT NULL,
-        date DATE NOT NULL
-      );
-    `;
- 
-    console.log(`Created "DetailTransaksiPenjualan" table`);
-   
-    const insertedDetailTransaksiPenjualan = await Promise.all(
-      DetailTransaksiPenjualan.map(
-        (DetailTransaksiPenjualan) => {
-          // Pastikan jumlah adalah number yang valid
-          const jumlah = Number(DetailTransaksiPenjualan.jumlah);
-          // Pastikan harga adalah number yang valid
-          const harga = Number(DetailTransaksiPenjualan.harga);
-
-          // Validasi untuk memastikan nilai yang valid
-          if (isNaN(jumlah) || isNaN(harga)) {
-            console.error('Invalid data:', DetailTransaksiPenjualan);
-            throw new Error('Invalid jumlah or harga value');
-          }
-
-          return client.sql`
-            INSERT INTO DetailTransaksiPenjualan (
-              id, 
-              id_penjualan, 
-              id_produk, 
-              jumlah, 
-              harga, 
-              date
-            )
-            VALUES (
-              ${DetailTransaksiPenjualan.id}, 
-              ${DetailTransaksiPenjualan.id_penjualan}, 
-              ${DetailTransaksiPenjualan.id_produk}, 
-              ${jumlah}, 
-              ${harga}, 
-              ${DetailTransaksiPenjualan.date}
-            )
-            ON CONFLICT (id) DO NOTHING;
-          `;
-        }
-      ),
-    );
- 
-    console.log(`Seeded ${insertedDetailTransaksiPenjualan.length} DetailTransaksiPenjualan`);
- 
-    return {
-      createTable,
-      DetailTransaksiPenjualan: insertedDetailTransaksiPenjualan,
-    };
-  } catch (error) {
-    console.error('Error seeding : DetailTransaksiPenjualan', error);
-    throw error;
-  }
-}
-
-
- 
  
 async function seedRevenue(client) {
   try {
-    // Create the "revenue" table if it doesn't exist
     const createTable = await client.sql`
       CREATE TABLE IF NOT EXISTS revenue (
         month VARCHAR(4) NOT NULL UNIQUE,
@@ -528,7 +404,6 @@ async function seedRevenue(client) {
  
     console.log(`Created "revenue" table`);
  
-    // Insert data into the "revenue" table
     const insertedRevenue = await Promise.all(
       revenue.map(
         (rev) => client.sql`
@@ -554,10 +429,8 @@ async function seedRevenue(client) {
 async function main() {
   const client = await db.connect();
 
-  // Hapus tabel dalam urutan yang benar (dari child ke parent)
+  await client.sql`DROP TABLE IF EXISTS penjualan_items CASCADE`;
   await client.sql`DROP TABLE IF EXISTS penjualan CASCADE`;
-  await client.sql`DROP TABLE IF EXISTS DetailTransaksiPenjualan CASCADE`;
-  await client.sql`DROP TABLE IF EXISTS DetailTransaksiPembelian CASCADE`;
   await client.sql`DROP TABLE IF EXISTS pembelian CASCADE`;
   await client.sql`DROP TABLE IF EXISTS stock CASCADE`;
   await client.sql`DROP TABLE IF EXISTS products CASCADE`;
@@ -566,17 +439,14 @@ async function main() {
   await client.sql`DROP TABLE IF EXISTS pegawai CASCADE`;
   await client.sql`DROP TABLE IF EXISTS roles CASCADE`;
 
-  // Kemudian buat tabel dalam urutan yang benar (dari parent ke child)
   await seedRoles(client);
+  await seedPegawai(client);
   await seedCustomers(client);
   await seedDistributors(client);
-  await seedPegawai(client);
   await seedProducts(client);
-  await seedPenjualan(client);
   await seedPembelian(client);
+  await seedPenjualan(client);
   await seedStock(client);
-  await seedDetailTransaksiPenjualan(client);
-  await seedDetailTransaksiPembelian(client);
   await seedRevenue(client);
 
   await client.end();

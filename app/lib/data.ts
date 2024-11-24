@@ -109,44 +109,133 @@ export async function fetchCardData() {
 
 const ITEMS_PER_PAGE = 10;
 
-export async function fetchFilteredPenjualan(query: string, currentPage: number) {
+export async function fetchFilteredPembelian(
+  query: string,
+  currentPage: number,
+  startDate?: string,
+  endDate?: string,
+) {
   noStore();
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    const data = await sql<PenjualanTable>`
-      WITH PenjualanItems AS (
-        SELECT 
-          penjualan_id,
-          SUM(quantity) as total_items,
-          SUM(subtotal) as total_subtotal
-        FROM penjualan_items
-        GROUP BY penjualan_id
-      )
+    let queryString = `
       SELECT
+        p.id,
+        p.date,
+        pg.name as nama_pegawai,
+        d.name as nama_distributor,
+        p.jumlah,
+        p.total
+      FROM pembelian p
+      JOIN distributors d ON p.distributorId = d.id
+      JOIN pegawai pg ON p.pegawaiId = pg.id
+    `;
+
+    const conditions = [];
+    const values = [];
+    
+    if (query) {
+      conditions.push(`(d.name ILIKE $${values.length + 1} OR pg.name ILIKE $${values.length + 1})`);
+      values.push(`%${query}%`);
+    }
+
+    if (startDate) {
+      conditions.push(`p.date >= $${values.length + 1}`);
+      values.push(startDate);
+    }
+
+    if (endDate) {
+      conditions.push(`p.date <= $${values.length + 1}`);
+      values.push(endDate);
+    }
+
+    if (conditions.length > 0) {
+      queryString += ` WHERE ${conditions.join(' AND ')}`;
+    }
+
+    queryString += ` ORDER BY p.date DESC LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+    values.push(ITEMS_PER_PAGE, offset);
+
+    const data = await sql.query(queryString, values);
+    return data.rows;
+
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch filtered pembelian data.');
+  }
+}
+
+export async function fetchFilteredPenjualan(
+  query: string,
+  currentPage: number,
+  startDate?: string,
+  endDate?: string,
+) {
+  noStore();
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  try {
+    let queryString = `
+      SELECT 
         p.id,
         p.date,
         c.name as nama_customer,
         peg.name as nama_pegawai,
-        COALESCE(pi.total_items, 0) as total_items,
+        COUNT(pi.id) as total_items,
         p.total_amount,
         p.total_bayar,
         p.poin_used
       FROM penjualan p
       JOIN customers c ON p.customerId = c.id
       JOIN pegawai peg ON p.pegawaiId = peg.id
-      LEFT JOIN PenjualanItems pi ON p.id = pi.penjualan_id
-      WHERE
-        c.name ILIKE ${`%${query}%`} OR
-        peg.name ILIKE ${`%${query}%`}
-      ORDER BY p.date DESC
-      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+      LEFT JOIN penjualan_items pi ON p.id = pi.penjualan_id
     `;
 
+    const conditions = [];
+    const values = [];
+    
+    if (query) {
+      conditions.push(`(c.name ILIKE $${values.length + 1} OR peg.name ILIKE $${values.length + 1})`);
+      values.push(`%${query}%`);
+    }
+
+    if (startDate) {
+      conditions.push(`p.date >= $${values.length + 1}`);
+      values.push(startDate);
+    }
+
+    if (endDate) {
+      conditions.push(`p.date <= $${values.length + 1}`);
+      values.push(endDate);
+    }
+
+    if (conditions.length > 0) {
+      queryString += ` WHERE ${conditions.join(' AND ')}`;
+    }
+
+    queryString += ` 
+      GROUP BY 
+        p.id, 
+        p.date, 
+        c.name, 
+        peg.name, 
+        p.total_amount, 
+        p.total_bayar, 
+        p.poin_used
+      ORDER BY p.date DESC 
+      LIMIT $${values.length + 1} 
+      OFFSET $${values.length + 2}
+    `;
+    
+    values.push(ITEMS_PER_PAGE, offset);
+
+    const data = await sql.query(queryString, values);
     return data.rows;
+
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch penjualan.');
+    throw new Error('Failed to fetch filtered penjualan data.');
   }
 }
 
@@ -613,34 +702,6 @@ export async function fetchPegawai() {
   }
 }
 
-export async function fetchFilteredPembelian(query: string, currentPage: number) {
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-
-  try {
-    const pembelian = await sql`
-      SELECT 
-        p.id,
-        p.date,
-        p.jumlah,
-        p.total,
-        peg.name as nama_pegawai,
-        d.name as nama_distributor
-      FROM pembelian p
-      JOIN pegawai peg ON p.pegawaiId = peg.id
-      JOIN distributors d ON p.distributorId = d.id
-      WHERE
-        peg.name ILIKE ${`%${query}%`} OR
-        d.name ILIKE ${`%${query}%`}
-      ORDER BY p.date DESC
-      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
-    `;
-    return pembelian.rows;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch pembelian data.');
-  }
-}
-
 export async function fetchPembelianPages(query: string) {
   try {
     const count = await sql`
@@ -697,6 +758,86 @@ export async function getPenjualanItems(id: string) {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch penjualan items.');
+  }
+}
+
+export async function fetchLaporanPenjualanPages(query: string, startDate?: string, endDate?: string) {
+  try {
+    let queryString = `
+      SELECT COUNT(DISTINCT p.id)
+      FROM penjualan p
+      JOIN customers c ON p.customerId = c.id
+      JOIN pegawai peg ON p.pegawaiId = peg.id
+    `;
+
+    const conditions = [];
+    const values = [];
+    
+    if (query) {
+      conditions.push(`(c.name ILIKE $${values.length + 1} OR peg.name ILIKE $${values.length + 1})`);
+      values.push(`%${query}%`);
+    }
+
+    if (startDate) {
+      conditions.push(`p.date >= $${values.length + 1}`);
+      values.push(startDate);
+    }
+
+    if (endDate) {
+      conditions.push(`p.date <= $${values.length + 1}`);
+      values.push(endDate);
+    }
+
+    if (conditions.length > 0) {
+      queryString += ` WHERE ${conditions.join(' AND ')}`;
+    }
+
+    const count = await sql.query(queryString, values);
+    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total pages.');
+  }
+}
+
+export async function fetchLaporanPembelianPages(query: string, startDate?: string, endDate?: string) {
+  try {
+    let queryString = `
+      SELECT COUNT(*)
+      FROM pembelian p
+      JOIN distributors d ON p.distributorId = d.id
+      JOIN pegawai pg ON p.pegawaiId = pg.id
+    `;
+
+    const conditions = [];
+    const values = [];
+    
+    if (query) {
+      conditions.push(`(d.name ILIKE $${values.length + 1} OR pg.name ILIKE $${values.length + 1})`);
+      values.push(`%${query}%`);
+    }
+
+    if (startDate) {
+      conditions.push(`p.date >= $${values.length + 1}`);
+      values.push(startDate);
+    }
+
+    if (endDate) {
+      conditions.push(`p.date <= $${values.length + 1}`);
+      values.push(endDate);
+    }
+
+    if (conditions.length > 0) {
+      queryString += ` WHERE ${conditions.join(' AND ')}`;
+    }
+
+    const count = await sql.query(queryString, values);
+    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total pages.');
   }
 }
 

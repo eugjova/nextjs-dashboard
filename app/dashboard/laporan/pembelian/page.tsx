@@ -11,12 +11,7 @@ import { fetchLaporanPembelianPages } from '@/app/lib/data';
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: {
-    query?: string;
-    page?: string;
-    startDate?: string;
-    endDate?: string;
-  };
+  searchParams?: any;
 }) {
   const params = await Promise.resolve(searchParams);
   const query = params?.query || '';

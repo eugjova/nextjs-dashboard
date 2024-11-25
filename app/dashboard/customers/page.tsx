@@ -19,8 +19,8 @@ export default async function Page({
 }: {
   searchParams?: any;
 }) {
-  const query = searchParams?.query || '';
-  const currentPage = Number(searchParams?.page) || 1;
+  const query = (await searchParams)?.query || '';
+  const currentPage = Number((await searchParams)?.page) || 1;
 
   await new Promise((resolve) => setTimeout(resolve, 3000));
   

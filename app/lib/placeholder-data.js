@@ -268,47 +268,77 @@ const penjualan_items = [
 
 const pembelian = [
   {
-    id: '3958dc9e-797f-4377-85e9-fec4b6a6442a',
-    date: '2024-01-01',
-    pegawaiId: 'c972a1fd-a7fe-4abe-82b1-ef3af5b45d23',
-    distributorId: '43893c55-36c4-461e-bea3-f29c05f1af59',
-    jumlah: 10,
+    id: '90a3f2dc-a82f-4a18-8f1b-4d3e2eb9a2e4',
+    id_pegawai : pegawai[0].name,
+    jumlah: 50,
+    total: 2000000,
+    date: '2023-01-11',
+  },
+  {
+    id: 'e1d4f1ba-f3ac-4b2f-8d58-9e07c3e5c598',
+    id_pegawai : pegawai[9].name,
+    jumlah: 30,
+    total: 1200000,
+    date: '2023-02-05',
+  },
+  {
+    id: 'bc6e7fdd-7e52-487d-b8b0-2ecf6d3e8a68',
+    id_pegawai : pegawai[8].name,
+    jumlah: 40,
+    total: 1600000,
+    date: '2023-03-12',
+  },
+  {
+    id: '3cfe8271-324d-4ee0-9e09-bce5bf5a9c53',
+    id_pegawai : pegawai[7].name,
+    jumlah: 25,
     total: 1000000,
   },
   {
-    id: '3958dc9e-737f-4377-85e9-fec4b6a6442b',
-    date: '2024-01-02',
-    pegawaiId: '554e03c1-5939-4f83-90ec-a5ecd796a1c8',
-    distributorId: '946dcd2a-c2af-4bef-8f09-513326334a05',
-    jumlah: 15,
-    total: 1500000,
+    id: '7654fdbc-3a3f-49af-b2b9-5a98f6e6d5e4',
+    id_pegawai : pegawai[6].name,
+    jumlah: 60,
+    total: 2400000,
+    date: '2023-05-17',
   },
   {
-    id: '76d65c26-f784-44a6-8ce0-e7835d433f80',
-    date: '2024-01-03',
-    pegawaiId: 'c972a1fd-a7fe-4abe-82b1-ef3af5b45d23',
-    distributorId: 'f912183f-9774-40ea-9c3f-07a79c25c8d0',
+    id: 'a0b5d7e2-df4b-4cb1-9c97-e567f75f3e02',
+    id_pegawai : pegawai[5].name,
+    jumlah: 35,
+    total: 1400000,
+    date: '2023-06-20',
+  },
+  {
+    id: 'b8c3e8a2-0d1f-45c5-9f6e-7a8a2d8e9c37',
+    id_pegawai : pegawai[4].name,
+    jumlah: 45,
+    total: 1800000,
+    date: '2023-07-15',
+  },
+  {
+    id: '46edc7e3-9d5f-4af7-b6c8-5e8c4a9d6f84',
+    id_pegawai : pegawai[3].name,
     jumlah: 20,
-    total: 2000000,
-  },
-  {
-    id: '9f486c52-ea3b-4fd5-9268-ac27238944ab',
-    date: '2024-01-04',
-    pegawaiId: '554e03c1-5939-4f83-90ec-a5ecd796a1c8',
-    distributorId: '5718509a-d12e-4169-a438-9440e00bee17',
-    jumlah: 12,
-    total: 1200000,
-  },
-  {
-    id: 'c5b8d137-41c4-4e9c-9e34-0d64f3f2cd9d',
-    date: '2024-01-05',
-    pegawaiId: 'c972a1fd-a7fe-4abe-82b1-ef3af5b45d23',
-    distributorId: 'da848c31-eab7-4446-b8eb-4b1b295cb131',
-    jumlah: 8,
     total: 800000,
+    date: '2023-08-18',
+  },
+  {
+    id: 'c4d5e6a7-8f2a-41e7-b9f8-7b2d6a7e8c5b',
+    id_pegawai : pegawai[2].name,
+    jumlah: 55,
+    total: 2200000,
+    date: '2023-09-25',
+  },
+  {
+    id: '82e1f3c4-0a6b-42d1-9c5e-7f8b2a4c6e1d',
+    id_pegawai : pegawai[1].name,
+    jumlah: 50,
+    total: 2000000,
+    date: '2023-10-10',
   }
-];
-
+]
+ 
+ 
 const stock = [
   {
     id: 'a3b8e5c7-2d9f-46e1-9f6a-8b2d7c5e9a1f',

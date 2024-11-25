@@ -1,54 +1,55 @@
 import Image from 'next/image';
-// import { UpdateInvoice, DeleteInvoice } from '@/app/ui/pembelian/buttons';
-// import InvoiceStatus from '@/app/ui/pembelian/status';
+// import { UpdateInvoice, DeleteInvoice } from '@/app/ui/detailtransaksipenjualan/buttons';
+// import InvoiceStatus from '@/app/ui/detailtransaksipenjualan/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
-import { fetchFilteredPembelian } from '@/app/lib/data';
+import { DetailTransaksiPenjualan } from '@/app/lib/placeholder-data';
+// import { fetchFilteredPenjualan } from '@/app/lib/data';
 
-export default async function PembelianTable({
+export default async function DetailPenjualanTable({
   query,
   currentPage,
 }: {
   query: string;
   currentPage: number;
 }) {
-  const pembelian = await fetchFilteredPembelian(query, currentPage);
+  // const detailtransaksipenjualan = await fetchFilteredPenjualan(query, currentPage);
 
   return (
     // <div className="mt-6 flow-root">
     //   <div className="inline-block min-w-full align-middle">
     //     <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
     //       <div className="md:hidden">
-    //         {pembelians?.map((pembelian) => (
+    //         {detailtransaksipenjualans?.map((detailtransaksipenjualan) => (
     //           <div
-    //             key={pembelian.id}
+    //             key={detailtransaksipenjualan.id}
     //             className="mb-2 w-full rounded-md bg-white p-4"
     //           >
     //             <div className="flex items-center justify-between border-b pb-4">
     //               <div>
     //                 <div className="mb-2 flex items-center">
     //                   <Image
-    //                     src={pembelian.image_url}
+    //                     src={detailtransaksipenjualan.image_url}
     //                     className="mr-2 rounded-full"
     //                     width={28}
     //                     height={28}
-    //                     alt={`${pembelian.name}'s profile picture`}
+    //                     alt={`${detailtransaksipenjualan.name}'s profile picture`}
     //                   />
-    //                   <p>{pembelian.name}</p>
+    //                   <p>{detailtransaksipenjualan.name}</p>
     //                 </div>
-    //                 <p className="text-sm text-gray-500">{pembelian.email}</p>
+    //                 <p className="text-sm text-gray-500">{detailtransaksipenjualan.email}</p>
     //               </div>
-    //               <InvoiceStatus status={pembelian.status} />
+    //               <InvoiceStatus status={detailtransaksipenjualan.status} />
     //             </div>
     //             <div className="flex w-full items-center justify-between pt-4">
     //               <div>
     //                 <p className="text-xl font-medium">
-    //                   {formatCurrency(pembelian.amount)}
+    //                   {formatCurrency(detailtransaksipenjualan.amount)}
     //                 </p>
-    //                 <p>{formatDateToLocal(pembelian.date)}</p>
+    //                 <p>{formatDateToLocal(detailtransaksipenjualan.date)}</p>
     //               </div>
     //               <div className="flex justify-end gap-2">
-    //                 <UpdateInvoice id={pembelian.id} />
-    //                 <DeleteInvoice id={pembelian.id} />
+    //                 <UpdateInvoice id={detailtransaksipenjualan.id} />
+    //                 <DeleteInvoice id={detailtransaksipenjualan.id} />
     //               </div>
     //             </div>
     //           </div>
@@ -57,52 +58,61 @@ export default async function PembelianTable({
           <table className="hidden min-w-full text-gray-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
-                <th scope="col" className="px-4 py-5 font-medium">
-                  Pegawai
+                <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
+                  Produk
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   Jumlah
                 </th>
-                <th scope="col" className="px-4 py-5 font-medium">
-                  Jumlah Item
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Harga
                 </th>
-                <th scope="col" className="px-4 py-5 font-medium">
-                  Total Harga
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Total
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Date
+                </th>
+                <th scope="col" className="relative py-3 pl-6 pr-3">
+                  <span className="sr-only">Edit</span>
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white">
-              {pembelian?.map((pembelian) => (
+              {DetailTransaksiPenjualan?.map((detailtransaksipenjualan) => (
                 <tr
-                  key={pembelian.id}
+                  key={detailtransaksipenjualan.id}
                   className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                 >
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex items-center gap-3">
                       {/* <Image
-                        src={pembelian.image_url}
+                        src={detailtransaksipenjualan.image_url}
                         className="rounded-full"
                         width={28}
                         height={28}
-                        alt={`${pembelian.name}'s profile picture`}
+                        alt={`${detailtransaksipenjualan.name}'s profile picture`}
                       /> */}
-                      <p>{pembelian.id_pegawai}</p>
+                      <p>{detailtransaksipenjualan.id_produk}</p>
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {pembelian.jumlah}
+                    {detailtransaksipenjualan.id_jumlah}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {formatCurrency(pembelian.total)}
+                    {formatCurrency(detailtransaksipenjualan.id_harga)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {formatDateToLocal(pembelian.date)}
+                    {formatCurrency(detailtransaksipenjualan.id_jumlah*detailtransaksipenjualan.id_harga)}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {formatDateToLocal(detailtransaksipenjualan.date)}
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                    {/* <div className="flex justify-end gap-3">
-                      <UpdateInvoice id={pembelian.id} />
-                      <DeleteInvoice id={pembelian.id} />
-                    </div> */}
+                    <div className="flex justify-end gap-3">
+                      {/* <UpdateInvoice id={detailtransaksipenjualan.id} />
+                      <DeleteInvoice id={detailtransaksipenjualan.id} /> */}
+                    </div>
                   </td>
                 </tr>
               ))}

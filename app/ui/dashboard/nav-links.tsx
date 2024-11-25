@@ -19,10 +19,11 @@ const links = [
   { name: 'Products', href: '/dashboard/products', icon: ShoppingBagIcon },
   { name: 'Pegawai', href: '/dashboard/pegawai', icon: UsersIcon },
   { name: 'Customers', href: '/dashboard/customers', icon: UserGroupIcon },
-  { name: 'Distributor', href: '/dashboard/distributors', icon: BuildingStorefrontIcon },
-  { name: 'Penjualan', href: '/dashboard/penjualan', icon: ArrowUpOnSquareIcon },
-  { name: 'Pembelian', href: '/dashboard/pembelian', icon: ArrowDownOnSquareIcon },
-  { name: 'Laporan', href: '/dashboard/laporan', icon: DocumentChartBarIcon },
+  { name: 'Distributor', href: '/dashboard/distributors', icon: UserGroupIcon },
+  { name: 'Penjualan', href: '/dashboard/invoices', icon: CreditCardIcon ,},
+  { name: 'Pembelian', href: '/dashboard/pembelian', icon: CreditCardIcon ,},
+  { name: 'Detail Transaksi Penjualan', href: '/dashboard/detailpenjualan', icon: DocumentDuplicateIcon },
+  { name: 'Detail Transaksi Pembelian', href: '/dashboard/detailpembelian', icon: DocumentDuplicateIcon },
 ];
 
 type NavLinksProps = {

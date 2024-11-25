@@ -1,14 +1,15 @@
 import Pagination from '@/app/ui/penjualan/pagination';
 import Search from '@/app/ui/search';
 import Table from '@/app/ui/penjualan/table';
+import { CreateInvoice } from '@/app/ui/penjualan/buttons';
 import { oswald } from '@/app/ui/fonts';
 import { Suspense } from 'react';
-import { 
-  fetchPenjualanPages, 
-  fetchCustomers, 
-  fetchProducts, 
-  fetchPegawai,
-} from '@/app/lib/data';
+// import { 
+//   fetchPenjualanPages, 
+//   fetchCustomers, 
+//   fetchProducts, 
+ 
+// } from '@/app/lib/data';
 import {
   SearchSkeleton,
   InvoicesTableSkeleton,
@@ -42,20 +43,16 @@ export default async function Page({
   return (
     <div className="flex min-h-screen flex-col">
       <p className={`${oswald.variable} text-3xl text-white`}>Penjualan Page</p>
-      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <Suspense fallback={<SearchSkeleton />}>
-          <Search placeholder="Search penjualan..." />
-        </Suspense>
-        <Suspense fallback={<CreateSkeleton />}>
-          <Form 
-            customers={customers} 
-            products={productsWithDistributor}
-            pegawai={pegawai}
-          />
-        </Suspense>
-      </div>
+    <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
+      <Suspense fallback={<SearchSkeleton />}>
+        <Search placeholder="Search penjualan..." />
+      </Suspense>
+      <Suspense fallback={<CreateSkeleton />}>
+      {/* <Form customers={customers} products={products}/> */}
+      </Suspense>
+    </div>
 
-      <div className="mt flow-root">
+    <div className="mt flow-root">
         <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
           <Table query={query} currentPage={currentPage} />
         </Suspense>

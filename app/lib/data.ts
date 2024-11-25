@@ -24,8 +24,9 @@ import {
 } from './definitions';
 import { unstable_noStore as noStore } from 'next/cache';
 import { formatCurrency } from './utils';
-import { distributors, penjualan, products, } from './placeholder-data';
-import { error } from 'console';
+
+import { products, } from './placeholder-data';
+
 
 export async function fetchRevenue() {
   // Add noStore() here to prevent the response from being cached.
@@ -176,66 +177,36 @@ export async function fetchFilteredPenjualan(
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    let queryString = `
-      SELECT 
-        p.id,
-        p.date,
-        c.name as nama_customer,
-        peg.name as nama_pegawai,
-        COUNT(pi.id) as total_items,
-        p.total_amount,
-        p.total_bayar,
-        p.poin_used
-      FROM penjualan p
-      JOIN customers c ON p.customerId = c.id
-      JOIN pegawai peg ON p.pegawaiId = peg.id
-      LEFT JOIN penjualan_items pi ON p.id = pi.penjualan_id
+    const invoices = await sql<PenjualanTable>`
+      SELECT
+        invoices.id,
+        invoices.id_pegawai,
+        invoices.costumerId,
+        invoices.id_produk,
+        invoices.jumlah,
+        customers.total,
+        customers.poin,
+        customers.date,
+        products.name AS product_name
+      FROM invoices
+      JOIN customers ON invoices.customer_id = customers.id
+      JOIN products ON invoices.product_id = products.id
+      WHERE
+        customers.name ILIKE ${`%${query}%`} OR
+        customers.email ILIKE ${`%${query}%`} OR
+        invoices.amount::text ILIKE ${`%${query}%`} OR
+        invoices.quantity::text ILIKE ${`%${query}%`} OR
+        invoices.date::text ILIKE ${`%${query}%`} OR
+        invoices.status ILIKE ${`%${query}%`} OR
+        products.name ILIKE ${`%${query}%`}
+      ORDER BY invoices.date DESC
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
 
-    const conditions = [];
-    const values = [];
-    
-    if (query) {
-      conditions.push(`(c.name ILIKE $${values.length + 1} OR peg.name ILIKE $${values.length + 1})`);
-      values.push(`%${query}%`);
-    }
-
-    if (startDate) {
-      conditions.push(`p.date >= $${values.length + 1}`);
-      values.push(startDate);
-    }
-
-    if (endDate) {
-      conditions.push(`p.date <= $${values.length + 1}`);
-      values.push(endDate);
-    }
-
-    if (conditions.length > 0) {
-      queryString += ` WHERE ${conditions.join(' AND ')}`;
-    }
-
-    queryString += ` 
-      GROUP BY 
-        p.id, 
-        p.date, 
-        c.name, 
-        peg.name, 
-        p.total_amount, 
-        p.total_bayar, 
-        p.poin_used
-      ORDER BY p.date DESC 
-      LIMIT $${values.length + 1} 
-      OFFSET $${values.length + 2}
-    `;
-    
-    values.push(ITEMS_PER_PAGE, offset);
-
-    const data = await sql.query(queryString, values);
-    return data.rows;
-
+    return invoices.rows;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch filtered penjualan data.');
+    throw new Error('Failed to fetch invoices.');
   }
 }
 
@@ -297,7 +268,12 @@ export async function fetchCustomers() {
       SELECT
         id,
         name,
-        poin
+        phone,
+        createdAt,
+        updatedAt,
+        gender,
+        poin,
+        image_url
       FROM customers
       ORDER BY name ASC
     `;
@@ -321,7 +297,8 @@ export async function fetchLatestCustomers() {
         createdAt,
         updatedAt,
         gender,
-        poin
+        poin,
+        image_url
       FROM customers
       ORDER BY name ASC`;
 

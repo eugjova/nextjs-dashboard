@@ -14,22 +14,32 @@ const CustomerSchema = z.object({
   image_url: z.string(),
 });
 
-const PembelianSchema = z.object({
-  date: z.string(),
-  pegawaiId: z.string(),
-  distributorId: z.string(),
-  quantity: z.string(),
-  total: z.string(),
+const FormSchemaPegawai = z.object({
+  id: z.string().optional(),
+  name: z.string(),
+  phone: z.string(),
+  gender: z.string(),
+  email: z.string(),
+  password: z.string(),
 });
 
-const PenjualanSchema = z.object({
-  date: z.string(),
-  customerId: z.string(),
-  pegawaiId: z.string(),
-  poin_used: z.coerce.number().default(0),
-  total_amount: z.coerce.number(),
-  total_bayar: z.coerce.number(),
-});
+
+const CreateInvoice = FormSchema.omit({ id: true, date: true });
+const UpdateInvoice = FormSchema.omit({ id: true, date: true });
+
+const CreateProduct = FormProductSchema.omit({ id: true });
+const UpdateProduct = FormProductSchema.omit({ id: true });
+
+const CreateDistributors = FormDistributorSchema.omit({ id: true });
+const UpdateDistributors = FormDistributorSchema.omit({ id: true });
+
+const CreateCustomer = FormSchemaCustomer.omit({ id: true});
+const UpdateCustomer = FormSchemaCustomer.omit({ id: true });
+
+const CreatePegawai = FormSchemaPegawai.omit({ id: true});
+const UpdatePegawai = FormSchemaPegawai.omit({ id: true });
+
+
 
 export async function createCustomer(formData: FormData) {
   const { name, phone, gender, poin, image_url } = CustomerSchema.parse({
@@ -273,70 +283,48 @@ export async function deletePegawai(id: string) {
   }
 }
 
-export async function createPegawai(formData: FormData) {
-  const { name, phone, gender, email, password } = z.object({
-    name: z.string(),
-    phone: z.string(),
-    gender: z.string(),
-    email: z.string().email(),
-    password: z.string().min(6)
-  }).parse({
-    name: formData.get('name'),
-    phone: formData.get('phone'),
-    gender: formData.get('gender'),
-    email: formData.get('email'),
-    password: formData.get('password')
+export async function createInvoice(formData: FormData) {
+  const { customerId, productId, quantity, amount, status } = CreateInvoice.parse({
+    customerId: formData.get('customerId'),
+    productId: formData.get('productId'),
+    quantity: formData.get('quantity'),
+    amount: formData.get('amount'),
+    status: formData.get('status'),
   });
 
-  try {
-    await sql`
-      INSERT INTO pegawai (name, phone, gender, email, password)
-      VALUES (${name}, ${phone}, ${gender}, ${email}, ${password})
-    `;
-    revalidatePath('/dashboard/pegawai');
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: 'Failed to create pegawai.' };
-  }
+  const date = new Date().toISOString().split('T')[0];
+
+  await sql`
+    INSERT INTO invoices (customer_id, product_id, quantity, amount, status, date)
+    VALUES (${customerId}, ${productId}, ${quantity}, ${amount}, ${status}, ${date})
+  `;
+
+  revalidatePath('/dashboard/invoices');
+  redirect('/dashboard/invoices');
 }
 
-export async function updatePegawai(id: string, formData: FormData) {
-  const { name, phone, gender, email, password } = z.object({
-    name: z.string(),
-    phone: z.string(),
-    gender: z.string(),
-    email: z.string().email(),
-    password: z.string().min(6)
-  }).parse({
-    name: formData.get('name'),
-    phone: formData.get('phone'),
-    gender: formData.get('gender'),
-    email: formData.get('email'),
-    password: formData.get('password')
+export async function updateInvoice(id: string, formData: FormData) {
+  const { customerId, productId, quantity, amount, status } = UpdateInvoice.parse({
+    customerId: formData.get('customerId'),
+    productId: formData.get('productId'),
+    quantity: formData.get('quantity'),
+    amount: formData.get('amount'),
+    status: formData.get('status'),
   });
-
-  try {
-    await sql`
-      UPDATE pegawai
-      SET name = ${name}, phone = ${phone}, gender = ${gender}, 
-          email = ${email}, password = ${password}
-      WHERE id = ${id}
-    `;
-    revalidatePath('/dashboard/pegawai');
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: 'Failed to update pegawai.' };
-  }
+ 
+  await sql`
+    UPDATE invoices
+    SET customer_id = ${customerId}, product_id = ${productId}, quantity = ${quantity}, amount = ${amount}, status = ${status}
+    WHERE id = ${id}
+  `;
+ 
+  revalidatePath('/dashboard/invoices');
+  redirect('/dashboard/invoices');
 }
 
-export async function deleteProduct(id: string) {
-  try {
-    await sql`DELETE FROM products WHERE id = ${id}`;
-    revalidatePath('/dashboard/products');
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: 'Failed to delete product.' };
-  }
+export async function deleteInvoice(id: string) {
+  await sql`DELETE FROM invoices WHERE id = ${id}`;
+  revalidatePath('/dashboard/invoices');
 }
 
 export async function createProduct(formData: FormData) {
@@ -410,18 +398,52 @@ export async function createDistributors(formData: FormData) {
     revalidatePath('/dashboard/distributors');
     return { success: true };
   } catch (error) {
-    console.error('Database Error:', error);
-    return { success: false, error: 'Failed to create distributor.' };
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials.';
+        default:
+          return 'Something went wrong.';
+      }
+    }
+    throw error;
   }
 }
 
-export async function deleteInvoice(id: string) {
-  try {
-    await sql`DELETE FROM pembelian WHERE id = ${id}`;
-    revalidatePath('/dashboard/pembelian');
-    return { success: true };
-  } catch (error) {
-    console.error('Database Error:', error);
-    return { success: false, error: 'Failed to delete pembelian.' };
-  }
-}
+// export async function createService(formData: FormData) {
+//   const { name, price, estimation } = CreateService.parse({
+//     name: formData.get('name'),
+//     price: formData.get('price'),
+//     estimation: formData.get('estimation'),
+//   });
+
+//   await sql`
+//     INSERT INTO services (name, price, estimation)
+//     VALUES (${name}, ${price}, ${estimation})
+//   `;
+
+//   revalidatePath('/dashboard/services');
+//   redirect('/dashboard/services');
+// }
+
+// export async function updateService(id: string, formData: FormData) {
+//   const { name, price, estimation } = UpdateService.parse({
+//     name: formData.get('name'),
+//     price: formData.get('price'),
+//     estimation: formData.get('estimation'),
+//   });
+ 
+//   await sql`
+//   UPDATE services
+//   SET name = ${name}, price = ${price}, estimation = ${estimation}
+//   WHERE id = ${id}
+// `;
+
+// revalidatePath('/dashboard/services');
+// redirect('/dashboard/services');
+// }
+
+// export async function deleteService(id: string) {
+//   await sql`DELETE FROM services WHERE id = ${id}`;
+//   revalidatePath('/dashboard/services');
+// }

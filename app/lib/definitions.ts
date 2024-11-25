@@ -105,7 +105,20 @@ export type ProductsTable = {
 export type ProductForm = {
   id: string;
   name: string;
-  stock: number;
+  phone: string;
+  gender : string
+};
+
+
+export type DistributorField = {
+  id: string;
+  name: string;
+  phone: string;
+};
+
+export type ProductsField = {
+  id: string;
+  name: string;
   price: number;
   image_url: string;
 };

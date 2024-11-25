@@ -114,6 +114,7 @@ export async function createPenjualan(formData: FormData) {
     console.log('Raw form data:', rawData);
 
     const penjualanData = PenjualanSchema.parse(rawData);
+    const earnedPoin = parseInt(formData.get('earnedPoin') as string) || 0;
 
     const penjualanId = crypto.randomUUID();
 
@@ -135,6 +136,12 @@ export async function createPenjualan(formData: FormData) {
         ${penjualanData.total_amount},
         ${penjualanData.total_bayar}
       )
+    `;
+
+    await sql`
+      UPDATE customers 
+      SET poin = poin - ${penjualanData.poin_used} + ${earnedPoin}
+      WHERE id = ${penjualanData.customerId}
     `;
 
     const productCount = parseInt(formData.get('productCount') as string);

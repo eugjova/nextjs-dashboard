@@ -2,7 +2,6 @@
 
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { signIn } from 'next-auth/react';
 import { AuthError } from 'next-auth';
@@ -50,30 +49,76 @@ cloudinary.config({
 
 export async function createCustomer(formData: FormData) {
   try {
-    const { name, phone, gender, poin } = Object.fromEntries(formData);
-    
-    const existingCustomer = await sql`
-      SELECT * FROM customers WHERE phone = ${phone as string}
+    const name = formData.get('name')?.toString();
+    const phone = formData.get('phone')?.toString();
+    const gender = formData.get('gender')?.toString();
+    const poin = formData.get('poin')?.toString() || '0';
+    const image = formData.get('image') as File | null;
+
+    if (!name || !phone || !gender) {
+      return {
+        success: false,
+        error: 'Data tidak lengkap'
+      };
+    }
+
+    const existingPhone = await sql`
+      SELECT id FROM customers WHERE phone = ${phone}
     `;
     
-    if (existingCustomer.rows.length > 0) {
+    if (existingPhone.rows.length > 0) {
       return {
         success: false,
         error: 'Nomor telepon sudah terdaftar'
       };
     }
 
+    let imageId = 'default_dafhf7';
+
+    if (image && image instanceof File && image.size > 0) {
+      try {
+        const bytes = await image.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        
+        const result = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream({
+            folder: 'customers',
+            resource_type: 'auto',
+            transformation: [
+              { width: 800, height: 600, crop: 'fill' },
+              { quality: 'auto:good' },
+              { fetch_format: 'auto' }
+            ],
+            eager: [
+              { width: 400, height: 300, crop: 'fill' },
+              { width: 200, height: 150, crop: 'fill' }
+            ],
+            eager_async: true,
+          }, (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }).end(buffer);
+        });
+
+        imageId = (result as any).public_id;
+      } catch (uploadError) {
+        console.error('Error uploading image:', uploadError);
+      }
+    }
+
     await sql`
-      INSERT INTO customers (name, phone, gender, poin)
-      VALUES (${name as string}, ${phone as string}, ${gender as string}, ${poin as string})
+      INSERT INTO customers (id, name, phone, gender, poin, image_url)
+      VALUES (${crypto.randomUUID()}, ${name}, ${phone}, ${gender}, ${parseInt(poin)}, ${imageId})
     `;
 
     revalidatePath('/dashboard/customers');
     return { success: true };
+
   } catch (error) {
+    console.error('Error in createCustomer:', error);
     return {
       success: false,
-      error: 'Gagal membuat customer baru'
+      error: 'Gagal membuat customer'
     };
   }
 }
@@ -241,24 +286,100 @@ export async function authenticate(
   }
 }
 
-export async function updateCustomer(id: string, formData: FormData) {
-  const { name, phone, gender, poin } = CustomerSchema.parse({
-    name: formData.get('name'),
-    phone: formData.get('phone'), 
-    gender: formData.get('gender'),
-    poin: formData.get('poin'),
-  });
-
+export async function updateCustomer(formData: FormData) {
   try {
-    await sql`
-      UPDATE customers
-      SET name = ${name}, phone = ${phone}, gender = ${gender}, poin = ${parseInt(poin)}
-      WHERE id = ${id}
+    const id = formData.get('id') as string;
+    const name = formData.get('name') as string;
+    const phone = formData.get('phone') as string;
+    const gender = formData.get('gender') as string;
+    const poin = formData.get('poin') as string;
+    const image = formData.get('image') as File | null;
+
+    if (!id || !name || !phone || !gender) {
+      return {
+        success: false,
+        error: 'Data tidak lengkap'
+      };
+    }
+
+    // Cek nomor telepon yang sudah ada (kecuali milik customer ini)
+    const existingPhone = await sql`
+      SELECT id FROM customers 
+      WHERE phone = ${phone} AND id != ${id}
     `;
+    
+    if (existingPhone.rows.length > 0) {
+      return {
+        success: false,
+        error: 'Nomor telepon sudah digunakan customer lain'
+      };
+    }
+
+    let imageId;
+
+    if (image && image instanceof File && image.size > 0) {
+      try {
+        const bytes = await image.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        
+        const result = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream({
+            folder: 'customers',
+            resource_type: 'auto',
+            transformation: [
+              { width: 800, height: 600, crop: 'fill' },
+              { quality: 'auto:good' },
+              { fetch_format: 'auto' }
+            ],
+            eager: [
+              { width: 400, height: 300, crop: 'fill' },
+              { width: 200, height: 150, crop: 'fill' }
+            ],
+            eager_async: true,
+          }, (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }).end(buffer);
+        });
+
+        imageId = (result as any).public_id;
+      } catch (uploadError) {
+        console.error('Error uploading image:', uploadError);
+      }
+    }
+
+    // Update dengan atau tanpa image baru
+    if (imageId) {
+      await sql`
+        UPDATE customers
+        SET 
+          name = ${name}, 
+          phone = ${phone}, 
+          gender = ${gender}, 
+          poin = ${parseInt(poin)},
+          image_url = ${imageId}
+        WHERE id = ${id}
+      `;
+    } else {
+      await sql`
+        UPDATE customers
+        SET 
+          name = ${name}, 
+          phone = ${phone}, 
+          gender = ${gender}, 
+          poin = ${parseInt(poin)}
+        WHERE id = ${id}
+      `;
+    }
+
     revalidatePath('/dashboard/customers');
     return { success: true };
   } catch (error) {
-    return { success: false, error: 'Failed to update customer.' };
+    console.error('Error in updateCustomer:', error);
+    return { 
+      success: false, 
+      error: 'Gagal mengupdate customer' 
+    };
   }
 }
 

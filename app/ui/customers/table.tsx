@@ -1,6 +1,6 @@
-import Image from 'next/image';
-import { UpdateCustomer, DeleteCustomer } from '@/app/ui/customers/buttons';
 import { fetchFilteredCustomers } from '@/app/lib/data';
+import { UpdateCustomer, DeleteCustomer } from '@/app/ui/customers/buttons';
+import CustomerImage from './customer-image';
 
 export default async function CustomersTable({
   query,
@@ -23,12 +23,10 @@ export default async function CustomersTable({
               >
                 <div className="flex items-center justify-between border-b pb-4">
                   <div className="flex items-center">
-                    <Image
-                      src={customer.image_url || '/customers/default.png'}
+                    <CustomerImage
+                      src={customer.image_url}
                       alt={`${customer.name}'s profile picture`}
                       className="mr-2 rounded-full"
-                      width={28}
-                      height={28}
                     />
                     <p>{customer.name}</p>
                   </div>
@@ -37,7 +35,7 @@ export default async function CustomersTable({
                   <div>
                   </div>
                   <div className="flex justify-end gap-2">
-                    <UpdateCustomer id={customer.id} />
+                    <UpdateCustomer customer={customer} />
                     <DeleteCustomer id={customer.id} />
                   </div>
                 </div>
@@ -76,12 +74,10 @@ export default async function CustomersTable({
                 <tr key={customer.id}>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex items-center gap-3">
-                      <Image
-                        src={customer.image_url || '/customers/default.png'}
-                        className="rounded-full"
+                      <CustomerImage
+                        src={customer.image_url}
                         alt={`${customer.name}'s profile picture`}
-                        width={28}
-                        height={28}
+                        className="rounded-full"
                       />
                       <p>{customer.name}</p>
                     </div>
@@ -97,7 +93,7 @@ export default async function CustomersTable({
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
-                      <UpdateCustomer id={customer.id} />
+                      <UpdateCustomer customer={customer} />
                       <DeleteCustomer id={customer.id} />
                     </div>
                   </td>

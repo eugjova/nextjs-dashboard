@@ -20,7 +20,7 @@ const customers = [
     updatedAt: CURRENT_DATE,
     gender: 'Female',
     poin: 50,
-    image_url: '/customers/amy-burns.png',
+    image_url: 'default_dafhf7',
   },
   {
     id: 'e80fd660-7210-47cd-8b31-4f894c4cd091',
@@ -30,7 +30,7 @@ const customers = [
     updatedAt: CURRENT_DATE,
     gender: 'Male',
     poin: 30,
-    image_url: '/customers/balazs-orban.png',
+    image_url: 'default_dafhf7',
   },
   {
     id: 'a8fe1c03-76e8-4e62-86a8-71b613a4d80c',
@@ -40,7 +40,7 @@ const customers = [
     updatedAt: CURRENT_DATE,
     gender: 'Female',
     poin: 70,
-    image_url: '/customers/delba-de-oliveira.png',
+    image_url: 'default_dafhf7',
   },
   {
     id: '8cc682b1-bad1-4245-944a-310de0be0d33',
@@ -50,7 +50,7 @@ const customers = [
     updatedAt: CURRENT_DATE,
     gender: 'Male',
     poin: 20,
-    image_url: '/customers/emil-kowalski.png',
+    image_url: 'default_dafhf7',
   },
   {
     id: 'af45f8bd-d819-410e-94ca-a33aa0dbeae0',
@@ -60,7 +60,7 @@ const customers = [
     updatedAt: CURRENT_DATE,
     gender: 'Male',
     poin: 100,
-    image_url: '/customers/evil-rabbit.png',
+    image_url: 'default_dafhf7',
   },
   {
     id: '5a5c53cc-8295-436a-ae92-6814c52161f2',
@@ -70,7 +70,7 @@ const customers = [
     updatedAt: CURRENT_DATE,
     gender: 'Male',
     poin: 40,
-    image_url: '/customers/guillermo-rauch.png',
+    image_url: 'default_dafhf7',
   },
   {
     id: '96d56084-b07e-4a30-8f43-801c3689e312',
@@ -80,7 +80,7 @@ const customers = [
     updatedAt: CURRENT_DATE,
     gender: 'Male',
     poin: 60,
-    image_url: '/customers/hector-simpson.png',
+    image_url: 'default_dafhf7',
   },
   {
     id: '8315b6e7-9d2d-48f8-a221-4320092fdd2f',
@@ -90,7 +90,7 @@ const customers = [
     updatedAt: CURRENT_DATE,
     gender: 'Male',
     poin: 80,
-    image_url: '/customers/jared-palmer.png',
+    image_url: 'default_dafhf7',
   },
   {
     id: '51e57b76-8696-4046-88d3-78167d75e723',
@@ -100,7 +100,7 @@ const customers = [
     updatedAt: CURRENT_DATE,
     gender: 'Male',
     poin: 90,
-    image_url: '/customers/lee-robinson.png',
+    image_url: 'default_dafhf7',
   },
   {
     id: 'd017d980-a226-4157-80b5-83ba2d8c824f',
@@ -110,7 +110,7 @@ const customers = [
     updatedAt: CURRENT_DATE,
     gender: 'Male',
     poin: 110,
-    image_url: '/customers/michael-novotny.png',
+    image_url: 'default_dafhf7',
   },
 ];
 

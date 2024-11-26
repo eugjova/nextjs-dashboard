@@ -376,21 +376,18 @@ export async function fetchCustomersPages(query: string) {
   noStore();
   try {
     const count = await sql`SELECT COUNT(*)
-    FROM penjualan
-    JOIN customers ON penjualan.customerId = customers.id
+    FROM customers
     WHERE
-      customers.name ILIKE ${`%${query}%`} OR
-      customers.email ILIKE ${`%${query}%`} OR
-      penjualan.amount::text ILIKE ${`%${query}%`} OR
-      penjualan.date::text ILIKE ${`%${query}%`} OR
-      penjualan.status ILIKE ${`%${query}%`}
+      name ILIKE ${`%${query}%`} OR
+      phone ILIKE ${`%${query}%`} OR
+      gender ILIKE ${`%${query}%`}
   `;
- 
+
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
     return totalPages;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch total number of invoices.');
+    throw new Error('Failed to fetch total number of customers.');
   }
 }
 

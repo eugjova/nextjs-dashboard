@@ -1,10 +1,14 @@
 'use client'
 
-import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { deleteCustomer } from '@/app/lib/action';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
- 
+import EditForm from './edit-form';
+import { CustomerField } from '@/app/lib/definitions';
+import { toast } from 'react-hot-toast';
+
 export function CreateCustomer() {
   return (
     <Link
@@ -16,56 +20,111 @@ export function CreateCustomer() {
     </Link>
   );
 }
- 
-export function UpdateCustomer({ id }: { id: string }) {
+
+export function UpdateCustomer({ customer }: { customer: CustomerField }) {
+  const [showEditModal, setShowEditModal] = useState(false);
+
   return (
-    <Link
-    href={`/dashboard/customers/${id}/edit`}
-      className="rounded-md border p-2 hover:bg-yellow-500"
-    >
-      <PencilIcon className="w-5" />
-    </Link>
+    <>
+      <button
+        onClick={() => setShowEditModal(true)}
+        className="rounded-md border p-2 hover:bg-gray-100"
+      >
+        <PencilIcon className="w-5" />
+      </button>
+      
+      {showEditModal && (
+        <EditForm 
+          customer={customer}
+          onClose={() => setShowEditModal(false)}
+        />
+      )}
+    </>
   );
 }
- 
+
 export function DeleteCustomer({ id }: { id: string }) {
-  const [isModalOpen, setModalOpen] = useState(false);
+  const router = useRouter();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    await deleteCustomer(id);
-    setModalOpen(false);
+    if (!id) return;
+
+    try {
+      setIsDeleting(true);
+      const result = await deleteCustomer(id);
+      
+      if (result.success) {
+        toast.success('Customer berhasil dihapus');
+        setShowDeleteModal(false);
+        router.refresh();
+      } else {
+        toast.error(result.error || 'Gagal menghapus customer');
+      }
+    } catch (error) {
+      toast.error('Terjadi kesalahan saat menghapus customer');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+    }
   };
 
   return (
     <>
       <button
-        type="button"
-        className="rounded-md border p-2 hover:bg-red-500"
-        onClick={() => setModalOpen(true)}
+        onClick={() => setShowDeleteModal(true)}
+        className="rounded-md border p-2 hover:bg-red-500 hover:text-white"
       >
-        <span className="sr-only">Delete</span>
         <TrashIcon className="w-5" />
       </button>
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-slate-500 p-6 rounded-md shadow-md">
-            <h3 className="font-bold text-lg mb-4">Are you sure you want to delete this data?</h3>
-            <div className="flex justify-end gap-4">
-              <button
-                className="px-4 py-2 rounded bg-gray-500 hover:bg-gray-600"
-                onClick={() => setModalOpen(false)}
-              >
-                Cancel
-              </button>
-              <form action={handleDelete}>
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div 
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => !isDeleting && setShowDeleteModal(false)}
+          />
+          <div className="relative z-[70] w-full max-w-sm bg-gray-800 rounded-lg shadow-xl">
+            <div className="p-4">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-semibold text-white">Konfirmasi Hapus</h3>
+                {!isDeleting && (
+                  <button 
+                    onClick={() => setShowDeleteModal(false)}
+                    className="text-gray-400 hover:text-white"
+                  >
+                    <XMarkIcon className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
+              
+              <div className="mt-3">
+                <p className="text-sm text-gray-300">
+                  Apakah Anda yakin ingin menghapus customer ini? 
+                  <br />
+                  Tindakan ini tidak dapat dibatalkan.
+                </p>
+              </div>
+              
+              <div className="mt-4 flex justify-end gap-2">
                 <button
-                  type="button"
-                  className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600"
-                  onClick={handleDelete}
+                  onClick={() => !isDeleting && setShowDeleteModal(false)}
+                  disabled={isDeleting}
+                  className={`px-3 py-1.5 text-xs rounded-lg bg-gray-600 text-white transition-colors
+                    ${isDeleting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'}`}
                 >
-                  Delete
+                  Batal
                 </button>
-              </form>
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className={`px-3 py-1.5 text-xs rounded-lg bg-red-600 text-white transition-colors
+                    ${isDeleting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-700'}`}
+                >
+                  {isDeleting ? 'Menghapus...' : 'Hapus'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

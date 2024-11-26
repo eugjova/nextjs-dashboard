@@ -83,6 +83,11 @@ export default function ProductsList({
     }, 1000);
   };
 
+  const handleCloseModal = () => {
+    setShowDeleteModal(false);
+    setSelectedProductId(null);
+  };
+
   return (
     <div>
       <div className="mt-4 flex items-center justify-between gap-2">
@@ -124,18 +129,18 @@ export default function ProductsList({
         <div className="fixed inset-0 z-[60] flex items-center justify-center">
           <div 
             className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => !isDeleting && setShowDeleteModal(false)}
+            onClick={handleCloseModal}
           />
           <div className="relative z-[70] bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm w-full mx-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-semibold text-white">Konfirmasi Hapus</h3>
               {!isDeleting && (
-                <div 
-                  onClick={() => setShowDeleteModal(false)}
+                <button 
+                  onClick={handleCloseModal}
                   className="text-gray-400 hover:text-white cursor-pointer"
                 >
                   <XMarkIcon className="h-6 w-6" />
-                </div>
+                </button>
               )}
             </div>
             
@@ -144,20 +149,28 @@ export default function ProductsList({
             </p>
             
             <div className="flex justify-end space-x-3">
-              <div
-                onClick={() => !isDeleting && setShowDeleteModal(false)}
-                className={`px-4 py-2 rounded-lg bg-gray-600 text-white transition-colors cursor-pointer
-                  ${isDeleting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'}`}
+              <button
+                onClick={handleCloseModal}
+                disabled={isDeleting}
+                className={`px-4 py-2 rounded-lg text-white transition-colors
+                  ${isDeleting 
+                    ? 'bg-gray-500 cursor-not-allowed opacity-50' 
+                    : 'bg-gray-600 hover:bg-gray-700 cursor-pointer'
+                  }`}
               >
                 Batal
-              </div>
-              <div
+              </button>
+              <button
                 onClick={handleDelete}
-                className={`px-4 py-2 rounded-lg bg-red-600 text-white transition-colors cursor-pointer
-                  ${isDeleting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-700'}`}
+                disabled={isDeleting}
+                className={`px-4 py-2 rounded-lg text-white transition-colors
+                  ${isDeleting 
+                    ? 'bg-red-400 cursor-not-allowed opacity-50' 
+                    : 'bg-red-600 hover:bg-red-700 cursor-pointer'
+                  }`}
               >
                 {isDeleting ? 'Menghapus...' : 'Hapus'}
-              </div>
+              </button>
             </div>
           </div>
         </div>

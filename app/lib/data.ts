@@ -499,30 +499,22 @@ export async function fetchFilteredDistributors(
   query: string,
   currentPage: number,
 ) {
-  const ITEMS_PER_PAGE = 10;
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   noStore();
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
   try {
-    const data = await sql<DistributorTableType>`
-      SELECT
-        distributors.id,
-        distributors.name,
-        distributors.phone
+    const distributors = await sql<DistributorField>`
+      SELECT *
       FROM distributors
-      WHERE name ILIKE ${`%${query}%`} OR phone::text ILIKE ${`%${query}%`}
-      GROUP BY distributors.id, distributors.name, distributors.phone
-      ORDER BY distributors.name ASC
+      WHERE name ILIKE ${`%${query}%`} OR phone ILIKE ${`%${query}%`}
+      ORDER BY name ASC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
 
-    const distributors = data.rows.map((distributor) => ({
-      ...distributor,
-    }));
-
-    return distributors;
-  } catch (err) {
-    console.error('Database Error:', err);
-    throw new Error('Failed to fetch distributor table.');
+    return distributors.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch distributors.');
   }
 }
 
@@ -530,22 +522,17 @@ export async function fetchFilteredDistributors(
 export async function fetchDistributorPages(query: string) {
   noStore();
   try {
-    const count = await sql`SELECT COUNT(*)
-    FROM invoices
-    JOIN customers ON invoices.customer_id = customers.id
-    WHERE
-      customers.name ILIKE ${`%${query}%`} OR
-      customers.email ILIKE ${`%${query}%`} OR
-      invoices.amount::text ILIKE ${`%${query}%`} OR
-      invoices.date::text ILIKE ${`%${query}%`} OR
-      invoices.status ILIKE ${`%${query}%`}
-  `;
- 
+    const count = await sql`
+      SELECT COUNT(*)
+      FROM distributors
+      WHERE name ILIKE ${`%${query}%`} OR phone ILIKE ${`%${query}%`}
+    `;
+
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
     return totalPages;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch total number of invoices.');
+    throw new Error('Failed to fetch total number of distributors.');
   }
 }
 

@@ -47,6 +47,27 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+const CreateDistributor = z.object({
+  name: z.string({
+    required_error: 'Nama wajib diisi',
+  }).min(1, 'Nama wajib diisi'),
+  phone: z.string({
+    required_error: 'Nomor telepon wajib diisi',
+  }).min(10, 'Nomor telepon minimal 10 digit').max(13, 'Nomor telepon maksimal 13 digit'),
+});
+
+const UpdateDistributor = z.object({
+  id: z.string({
+    required_error: 'ID wajib diisi',
+  }),
+  name: z.string({
+    required_error: 'Nama wajib diisi',
+  }).min(1, 'Nama wajib diisi'),
+  phone: z.string({
+    required_error: 'Nomor telepon wajib diisi',
+  }).min(10, 'Nomor telepon minimal 10 digit').max(13, 'Nomor telepon maksimal 13 digit'),
+});
+
 export async function createCustomer(formData: FormData) {
   try {
     const name = formData.get('name')?.toString();
@@ -393,25 +414,51 @@ export async function deleteDistributors(id: string) {
   }
 }
 
-export async function updateDistributors(id: string, formData: FormData) {
-  const { name, phone } = z.object({
-    name: z.string(),
-    phone: z.string()
-  }).parse({
-    name: formData.get('name'),
-    phone: formData.get('phone')
-  });
-
+export async function updateDistributors(formData: FormData) {
   try {
+    const validatedFields = UpdateDistributor.safeParse({
+      id: formData.get('id'),
+      name: formData.get('name'),
+      phone: formData.get('phone'),
+    });
+
+    if (!validatedFields.success) {
+      return {
+        success: false,
+        error: validatedFields.error.errors[0].message
+      };
+    }
+
+    const { id, name, phone } = validatedFields.data;
+    const updatedAt = new Date().toISOString();
+
+    // Cek nomor telepon yang sudah ada (kecuali milik distributor ini)
+    const existingPhone = await sql`
+      SELECT id FROM distributors 
+      WHERE phone = ${phone} AND id != ${id}
+    `;
+    
+    if (existingPhone.rows.length > 0) {
+      return {
+        success: false,
+        error: 'Nomor telepon sudah digunakan distributor lain'
+      };
+    }
+
     await sql`
-      UPDATE distributors 
-      SET name = ${name}, phone = ${phone}
+      UPDATE distributors
+      SET name = ${name}, phone = ${phone}, updatedat = ${updatedAt}
       WHERE id = ${id}
     `;
+
     revalidatePath('/dashboard/distributors');
     return { success: true };
   } catch (error) {
-    return { success: false, error: 'Failed to update distributor.' };
+    console.error('Database Error:', error);
+    return {
+      success: false,
+      error: 'Gagal mengupdate distributor'
+    };
   }
 }
 
@@ -779,25 +826,48 @@ export async function updateProduct(id: string, formData: FormData) {
 }
 
 export async function createDistributors(formData: FormData) {
-  const { name, phone } = z.object({
-    name: z.string(),
-    phone: z.string()
-  }).parse({
-    name: formData.get('name'),
-    phone: formData.get('phone')
-  });
-
   try {
-    await sql`
-      INSERT INTO distributors (name, phone)
-      VALUES (${name}, ${phone})
+    const validatedFields = CreateDistributor.safeParse({
+      name: formData.get('name'),
+      phone: formData.get('phone'),
+    });
+
+    if (!validatedFields.success) {
+      return {
+        success: false,
+        error: validatedFields.error.errors[0].message
+      };
+    }
+
+    const { name, phone } = validatedFields.data;
+    const createdAt = new Date().toISOString();
+    const updatedAt = createdAt;
+
+    // Cek nomor telepon yang sudah ada
+    const existingPhone = await sql`
+      SELECT id FROM distributors WHERE phone = ${phone}
     `;
     
+    if (existingPhone.rows.length > 0) {
+      return {
+        success: false,
+        error: 'Nomor telepon sudah digunakan'
+      };
+    }
+
+    await sql`
+      INSERT INTO distributors (name, phone, createdat, updatedat)
+      VALUES (${name}, ${phone}, ${createdAt}, ${updatedAt})
+    `;
+
     revalidatePath('/dashboard/distributors');
     return { success: true };
   } catch (error) {
     console.error('Database Error:', error);
-    return { success: false, error: 'Failed to create distributor.' };
+    return {
+      success: false,
+      error: 'Gagal membuat distributor'
+    };
   }
 }
 

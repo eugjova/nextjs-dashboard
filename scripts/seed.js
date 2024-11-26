@@ -182,43 +182,53 @@ async function seedDistributors(client) {
 async function seedProducts(client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
- 
+    
+    // Drop existing table if exists
+    await client.sql`DROP TABLE IF EXISTS products CASCADE`;
+    
+    // Create products table dengan kolom image_url sebagai TEXT
     const createTable = await client.sql`
       CREATE TABLE IF NOT EXISTS products (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        stock INT NOT NULL,
-        price INT NOT NULL,
-        distributorId UUID NOT NULL,
-        image_url VARCHAR(255) NOT NULL,
-        createdAt DATE NOT NULL,
-        updatedAt DATE NOT NULL
+        name VARCHAR(255) NOT NULL UNIQUE,
+        stock INTEGER NOT NULL DEFAULT 0,
+        price INTEGER NOT NULL DEFAULT 0,
+        distributorId UUID NOT NULL REFERENCES distributors(id),
+        image_url TEXT DEFAULT 'products/default',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `;
- 
+
     console.log(`Created "products" table`);
- 
+
+    // Insert seed data
     const insertedProducts = await Promise.all(
       products.map(
         (product) => client.sql`
-        INSERT INTO products (id, name, stock, price, distributorId, image_url, createdAt, updatedAt)
+        INSERT INTO products (
+          id, 
+          name, 
+          stock, 
+          price, 
+          distributorId,
+          image_url
+        )
         VALUES (
           ${product.id}, 
           ${product.name}, 
           ${product.stock}, 
-          ${product.price}, 
-          ${product.distributorId}, 
-          ${product.image_url}, 
-          ${product.createdAt}, 
-          ${product.updatedAt}
+          ${product.price},
+          ${product.distributorId},
+          ${product.image_url}
         )
         ON CONFLICT (id) DO NOTHING;
       `,
       ),
     );
- 
+
     console.log(`Seeded ${insertedProducts.length} products`);
- 
+
     return {
       createTable,
       products: insertedProducts,
@@ -429,6 +439,7 @@ async function seedRevenue(client) {
 async function main() {
   const client = await db.connect();
 
+  // Drop tables in correct order
   await client.sql`DROP TABLE IF EXISTS penjualan_items CASCADE`;
   await client.sql`DROP TABLE IF EXISTS penjualan CASCADE`;
   await client.sql`DROP TABLE IF EXISTS pembelian CASCADE`;
@@ -439,6 +450,7 @@ async function main() {
   await client.sql`DROP TABLE IF EXISTS pegawai CASCADE`;
   await client.sql`DROP TABLE IF EXISTS roles CASCADE`;
 
+  // Seed tables in correct order
   await seedRoles(client);
   await seedPegawai(client);
   await seedCustomers(client);

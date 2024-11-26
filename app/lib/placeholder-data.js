@@ -214,24 +214,20 @@ const pegawai = [
 
 const products = [
   {
-    id: 'e45f3577-c34d-4b27-b5c3-345ab825445b',
-    name: 'Ramen Original Saburo',
+    id: '3958dc9e-712f-4377-85e9-fec4b6a6442a',
+    name: 'Ramen',
     stock: 50,
-    price: 30000,
-    distributorId: distributors[0].id,
-    createdAt: CURRENT_DATE,
-    updatedAt: CURRENT_DATE,
-    image_url: '/products/ramen.png',
+    price: 15000,
+    distributorId: '46fe089e-2f59-4877-95da-23f0eabafa55',
+    image_url: 'ramen_udu9q0'
   },
   {
-    id: 'a84b6488-4e09-4251-9b2f-784b4584944b',
-    name: 'Ramen Spicy Level 1',
-    stock: 40,
-    price: 32000,
-    distributorId: distributors[1].id,
-    createdAt: CURRENT_DATE,
-    updatedAt: CURRENT_DATE,
-    image_url: '/products/ramen.png',
+    id: '3958dc9e-737f-4377-85e9-fec4b6a6442a',
+    name: 'Chicken Strip',
+    stock: 45,
+    price: 12000,
+    distributorId: '43893c55-36c4-461e-bea3-f29c05f1af59',
+    image_url: 'chicken-strip_l4w0ek'
   },
 ];
 
@@ -251,7 +247,7 @@ const penjualan_items = [
   {
     id: '3958dc9e-787f-4377-85e9-fec4b6a6442a',
     penjualan_id: '3958dc9e-712f-4377-85e9-fec4b6a6442a',
-    product_id: 'e45f3577-c34d-4b27-b5c3-345ab825445b',
+    product_id: '3958dc9e-712f-4377-85e9-fec4b6a6442a',
     quantity: 2,
     price_per_item: 50000,
     subtotal: 100000,
@@ -259,7 +255,7 @@ const penjualan_items = [
   {
     id: '3958dc9e-792f-4377-85e9-fec4b6a6442a',
     penjualan_id: '3958dc9e-712f-4377-85e9-fec4b6a6442a',
-    product_id: 'a84b6488-4e09-4251-9b2f-784b4584944b',
+    product_id: '3958dc9e-737f-4377-85e9-fec4b6a6442a',
     quantity: 1,
     price_per_item: 50000,
     subtotal: 50000,

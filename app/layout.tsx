@@ -1,6 +1,7 @@
 import '@/app/ui/global.css';
 import { oswald } from '@/app/ui/fonts';
 import { Metadata } from 'next';
+import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
   title: {
@@ -20,6 +21,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${oswald.variable}`}>
         {children}
+        <Toaster position="top-center" />
       </body>
     </html>
   );

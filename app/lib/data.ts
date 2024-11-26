@@ -108,6 +108,7 @@ export async function fetchCardData() {
 }
 
 const ITEMS_PER_PAGE = 10;
+const PRODUCTS_PER_PAGE = 8;
 
 export async function fetchFilteredPembelian(
   query: string,
@@ -598,46 +599,43 @@ export async function fetchFilteredProducts(
   query: string,
   currentPage: number,
 ) {
-  const ITEMS_PER_PAGE = 11; // Define or import ITEMS_PER_PAGE
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   noStore();
+  const offset = (currentPage - 1) * PRODUCTS_PER_PAGE;
+
   try {
-    const data = await sql<ProductsTableType>`
-      SELECT
+    const data = await sql<ProductsTable>`
+      SELECT 
         products.id,
         products.name,
         products.stock,
+        products.price,
         products.image_url,
-        products.price
+        products.distributorId,
+        distributors.name as distributor_name
       FROM products
-      WHERE name ILIKE ${`%${query}%`} OR stock ::text ILIKE ${`%${query}%`}
-      GROUP BY products.id, products.name, products.stock
-      ORDER BY products.name ASC
-      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+      LEFT JOIN distributors ON products.distributorId = distributors.id
+      WHERE products.name ILIKE ${`%${query}%`}
+      ORDER BY products.name DESC
+      LIMIT ${PRODUCTS_PER_PAGE} OFFSET ${offset}
     `;
 
-    const products = data.rows.map((products) => ({
-      ...products,
-    }));
-
-    return products;
+    return data.rows;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch products table.');
+    throw new Error('Failed to fetch products.');
   }
 }
  
 export async function fetchProductsPages(query: string) {
   noStore();
   try {
-    const count = await sql`SELECT COUNT(*)
+    const count = await sql`
+      SELECT COUNT(*)
       FROM products
-      WHERE
-        name ILIKE ${`%${query}%`} OR
-        price::text ILIKE ${`%${query}%`}
+      WHERE name ILIKE ${`%${query}%`}
     `;
 
-    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(Number(count.rows[0].count) / PRODUCTS_PER_PAGE);
     return totalPages;
   } catch (error) {
     console.error('Database Error:', error);

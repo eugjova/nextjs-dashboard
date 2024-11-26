@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { signIn } from 'next-auth/react';
 import { AuthError } from 'next-auth';
 import { v2 as cloudinary } from 'cloudinary';
+import bcrypt from 'bcrypt';
 
 const CustomerSchema = z.object({
   name: z.string(),
@@ -303,30 +304,101 @@ export async function deletePegawai(id: string) {
   }
 }
 
+const PegawaiSchema = z.object({
+  name: z.string({
+    required_error: 'Nama wajib diisi',
+  }).min(1, 'Nama wajib diisi'),
+  phone: z.string({
+    required_error: 'Nomor telepon wajib diisi',
+  }).min(1, 'Nomor telepon wajib diisi'),
+  gender: z.string({
+    required_error: 'Gender wajib diisi',
+  }).min(1, 'Gender wajib diisi'),
+  email: z.string({
+    required_error: 'Email wajib diisi',
+  }).email('Format email tidak valid'),
+  password: z.string({
+    required_error: 'Password wajib diisi',
+  }).min(6, 'Password minimal 6 karakter'),
+});
+
 export async function createPegawai(formData: FormData) {
   try {
-    const { name, phone, gender, email, password } = Object.fromEntries(formData);
+    const validatedFields = PegawaiSchema.safeParse({
+      name: formData.get('name'),
+      phone: formData.get('phone'),
+      gender: formData.get('gender'),
+      email: formData.get('email'),
+      password: formData.get('password'),
+    });
 
-    const existingPegawai = await sql`
-      SELECT * FROM pegawai 
-      WHERE email = ${email as string} OR phone = ${phone as string}
-    `;
-    
-    if (existingPegawai.rows.length > 0) {
+    if (!validatedFields.success) {
+      console.error('Validation errors:', validatedFields.error.flatten());
       return {
         success: false,
-        error: 'Email atau nomor telepon sudah terdaftar'
+        error: validatedFields.error.errors[0].message || 'Data tidak valid. Periksa kembali input Anda.'
       };
     }
 
+    const { name, phone, gender, email, password } = validatedFields.data;
+    
+    const existingEmail = await sql`
+      SELECT id FROM pegawai WHERE email = ${email}
+    `;
+    
+    if (existingEmail.rows.length > 0) {
+      return {
+        success: false,
+        error: 'Email sudah terdaftar, gunakan email lain'
+      };
+    }
+
+    const existingPhone = await sql`
+      SELECT id FROM pegawai WHERE phone = ${phone}
+    `;
+    
+    if (existingPhone.rows.length > 0) {
+      return {
+        success: false,
+        error: 'Nomor telepon sudah terdaftar, gunakan nomor lain'
+      };
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const id = crypto.randomUUID();
+    const id_role = "123e4567-e89b-12d3-a456-426614174000";
+    const currentDate = new Date().toISOString();
+
     await sql`
-      INSERT INTO pegawai (name, phone, gender, email, password)
-      VALUES (${name as string}, ${phone as string}, ${gender as string}, ${email as string}, ${password as string})
+      INSERT INTO pegawai (
+        id,
+        id_role, 
+        name, 
+        phone, 
+        gender, 
+        email, 
+        password,
+        createdat,
+        updatedat
+      )
+      VALUES (
+        ${id},
+        ${id_role},
+        ${name}, 
+        ${phone}, 
+        ${gender}, 
+        ${email}, 
+        ${hashedPassword},
+        ${currentDate},
+        ${currentDate}
+      )
     `;
 
     revalidatePath('/dashboard/pegawai');
     return { success: true };
   } catch (error) {
+    console.error('Database Error:', error);
     return {
       success: false,
       error: 'Gagal membuat pegawai baru'
@@ -334,32 +406,88 @@ export async function createPegawai(formData: FormData) {
   }
 }
 
-export async function updatePegawai(id: string, formData: FormData) {
-  const { name, phone, gender, email, password } = z.object({
-    name: z.string(),
-    phone: z.string(),
-    gender: z.string(),
-    email: z.string().email(),
-    password: z.string().min(6)
-  }).parse({
-    name: formData.get('name'),
-    phone: formData.get('phone'),
-    gender: formData.get('gender'),
-    email: formData.get('email'),
-    password: formData.get('password')
-  });
+const UpdatePegawaiSchema = z.object({
+  name: z.string({
+    required_error: 'Nama wajib diisi',
+  }).min(1, 'Nama wajib diisi'),
+  phone: z.string({
+    required_error: 'Nomor telepon wajib diisi',
+  }).min(1, 'Nomor telepon wajib diisi'),
+  gender: z.string({
+    required_error: 'Gender wajib diisi',
+  }).min(1, 'Gender wajib diisi'),
+  email: z.string({
+    required_error: 'Email wajib diisi',
+  }).email('Format email tidak valid'),
+  password: z.string().min(6, 'Password minimal 6 karakter').optional(),
+});
 
+export async function updatePegawai(id: string, formData: FormData) {
   try {
-    await sql`
-      UPDATE pegawai
-      SET name = ${name}, phone = ${phone}, gender = ${gender}, 
-          email = ${email}, password = ${password}
-      WHERE id = ${id}
+    const validatedFields = UpdatePegawaiSchema.safeParse({
+      name: formData.get('name'),
+      phone: formData.get('phone'),
+      gender: formData.get('gender'),
+      email: formData.get('email'),
+      password: formData.get('password') || undefined,
+    });
+
+    if (!validatedFields.success) {
+      return {
+        success: false,
+        error: validatedFields.error.errors[0].message
+      };
+    }
+
+    const { name, phone, gender, email, password } = validatedFields.data;
+
+    const existingData = await sql`
+      SELECT id FROM pegawai 
+      WHERE (email = ${email} OR phone = ${phone})
+      AND id != ${id}
     `;
+
+    if (existingData.rows.length > 0) {
+      return {
+        success: false,
+        error: 'Email atau nomor telepon sudah digunakan oleh pegawai lain'
+      };
+    }
+
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await sql`
+        UPDATE pegawai
+        SET 
+          name = ${name},
+          phone = ${phone},
+          gender = ${gender},
+          email = ${email},
+          password = ${hashedPassword},
+          updatedat = ${new Date().toISOString()}
+        WHERE id = ${id}
+      `;
+    } else {
+      await sql`
+        UPDATE pegawai
+        SET 
+          name = ${name},
+          phone = ${phone},
+          gender = ${gender},
+          email = ${email},
+          updatedat = ${new Date().toISOString()}
+        WHERE id = ${id}
+      `;
+    }
+
     revalidatePath('/dashboard/pegawai');
     return { success: true };
   } catch (error) {
-    return { success: false, error: 'Failed to update pegawai.' };
+    console.error('Database Error:', error);
+    return { 
+      success: false, 
+      error: 'Gagal mengupdate data pegawai' 
+    };
   }
 }
 

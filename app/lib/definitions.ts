@@ -152,14 +152,14 @@ export type PegawaiTableType = {
   password: string;
 };
 
-export type PegawaiForm = {
+export interface PegawaiForm {
   id: string;
   name: string;
   phone: string;
   gender: string;
   email: string;
   password: string;
-};
+}
 
 export type FormattedCustomersTable = {
   id: string;

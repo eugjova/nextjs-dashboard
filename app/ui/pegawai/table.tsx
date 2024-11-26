@@ -51,7 +51,7 @@ export default async function PegawaiTable({
                   <div>
                   </div>
                   <div className="flex justify-end gap-2">
-                    <UpdatePegawai id={pegawai.id} />
+                    <UpdatePegawai pegawai={pegawai} />
                     <DeletePegawai id={pegawai.id} />
                   </div>
                 </div>
@@ -66,7 +66,7 @@ export default async function PegawaiTable({
                       </div>
                       <div className="flex w-1/2 flex-col">
                        
-                        <p className="font-medium">{pegawai.password}</p>
+                        <p className="font-medium">{'•'.repeat(10)}</p>
                       </div>
                     </div>
                     {/* <div className="pt-4 text-sm">
@@ -121,14 +121,14 @@ export default async function PegawaiTable({
                         {pegawai.email}
                       </td>
                       <td className="whitespace-nowrap px-4 py-5 text-sm">
-                        {pegawai.password}
+                        {'•'.repeat(10)}
                       </td>
                       {/* <td className="whitespace-nowrap px-4 py-5 text-sm group-first-of-type:rounded-md group-last-of-type:rounded-md">
                         {pegawai.total_paid}
                       </td> */}
                       <td className="whitespace-nowrap py-3 pl-6 pr-3">
                         <div className="flex justify-end gap-3">
-                          <UpdatePegawai id={pegawai.id} />
+                          <UpdatePegawai pegawai={pegawai} />
                           <DeletePegawai id={pegawai.id} />
                         </div>
                       </td>

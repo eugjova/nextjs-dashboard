@@ -5,7 +5,6 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { signIn } from 'next-auth/react';
 import { AuthError } from 'next-auth';
-import { v2 as cloudinary } from 'cloudinary';
 import bcrypt from 'bcrypt';
 
 const CustomerSchema = z.object({
@@ -41,11 +40,33 @@ const ProductSchema = z.object({
   image: z.any().optional(),
 });
 
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+async function getCloudinary() {
+  const cloudinary = await import('cloudinary');
+  const cloudinaryV2 = cloudinary.v2;
+  
+  cloudinaryV2.config({
+    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+
+  return cloudinaryV2;
+}
+
+async function uploadToCloudinary(buffer: Buffer, options: any) {
+  const cloudinaryV2 = await getCloudinary();
+  
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinaryV2.uploader.upload_stream(
+      options,
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    uploadStream.end(buffer);
+  });
+}
 
 const CreateDistributor = z.object({
   name: z.string({
@@ -101,24 +122,19 @@ export async function createCustomer(formData: FormData) {
         const bytes = await image.arrayBuffer();
         const buffer = Buffer.from(bytes);
         
-        const result = await new Promise((resolve, reject) => {
-          cloudinary.uploader.upload_stream({
-            folder: 'customers',
-            resource_type: 'auto',
-            transformation: [
-              { width: 800, height: 600, crop: 'fill' },
-              { quality: 'auto:good' },
-              { fetch_format: 'auto' }
-            ],
-            eager: [
-              { width: 400, height: 300, crop: 'fill' },
-              { width: 200, height: 150, crop: 'fill' }
-            ],
-            eager_async: true,
-          }, (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }).end(buffer);
+        const result = await uploadToCloudinary(buffer, {
+          folder: 'customers',
+          resource_type: 'auto',
+          transformation: [
+            { width: 800, height: 600, crop: 'fill' },
+            { quality: 'auto:good' },
+            { fetch_format: 'auto' }
+          ],
+          eager: [
+            { width: 400, height: 300, crop: 'fill' },
+            { width: 200, height: 150, crop: 'fill' }
+          ],
+          eager_async: true,
         });
 
         imageId = (result as any).public_id;
@@ -342,24 +358,19 @@ export async function updateCustomer(formData: FormData) {
         const bytes = await image.arrayBuffer();
         const buffer = Buffer.from(bytes);
         
-        const result = await new Promise((resolve, reject) => {
-          cloudinary.uploader.upload_stream({
-            folder: 'customers',
-            resource_type: 'auto',
-            transformation: [
-              { width: 800, height: 600, crop: 'fill' },
-              { quality: 'auto:good' },
-              { fetch_format: 'auto' }
-            ],
-            eager: [
-              { width: 400, height: 300, crop: 'fill' },
-              { width: 200, height: 150, crop: 'fill' }
-            ],
-            eager_async: true,
-          }, (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }).end(buffer);
+        const result = await uploadToCloudinary(buffer, {
+          folder: 'customers',
+          resource_type: 'auto',
+          transformation: [
+            { width: 800, height: 600, crop: 'fill' },
+            { quality: 'auto:good' },
+            { fetch_format: 'auto' }
+          ],
+          eager: [
+            { width: 400, height: 300, crop: 'fill' },
+            { width: 200, height: 150, crop: 'fill' }
+          ],
+          eager_async: true,
         });
 
         imageId = (result as any).public_id;
@@ -700,25 +711,20 @@ export async function createProduct(formData: FormData) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
       
-      const result = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream({
-          folder: 'products',
-          resource_type: 'auto',
-          transformation: [
-            { width: 800, height: 600, crop: 'fill' },
-            { quality: 'auto:good' },
-            { fetch_format: 'auto' }
-          ],
-          eager: [
-            { width: 400, height: 300, crop: 'fill' },
-            { width: 200, height: 150, crop: 'fill' }
-          ],
-          eager_async: true,
-          fallback: imageUrl
-        }, (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }).end(buffer);
+      const result = await uploadToCloudinary(buffer, {
+        folder: 'products',
+        resource_type: 'auto',
+        transformation: [
+          { width: 800, height: 600, crop: 'fill' },
+          { quality: 'auto:good' },
+          { fetch_format: 'auto' }
+        ],
+        eager: [
+          { width: 400, height: 300, crop: 'fill' },
+          { width: 200, height: 150, crop: 'fill' }
+        ],
+        eager_async: true,
+        fallback: imageUrl
       });
 
       imageUrl = (result as any).public_id;
@@ -770,19 +776,14 @@ export async function updateProduct(id: string, formData: FormData) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
       
-      const result = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream({
-          folder: 'products',
-          resource_type: 'auto',
-          transformation: [
-            { width: 800, height: 600, crop: 'fill' },
-            { quality: 'auto:good' },
-            { fetch_format: 'auto' }
-          ],
-        }, (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }).end(buffer);
+      const result = await uploadToCloudinary(buffer, {
+        folder: 'products',
+        resource_type: 'auto',
+        transformation: [
+          { width: 800, height: 600, crop: 'fill' },
+          { quality: 'auto:good' },
+          { fetch_format: 'auto' }
+        ],
       });
 
       imageUrl = (result as any).public_id;
@@ -876,4 +877,10 @@ export async function deleteInvoice(id: string) {
     console.error('Database Error:', error);
     return { success: false, error: 'Failed to delete pembelian.' };
   }
+}
+
+if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 
+    !process.env.CLOUDINARY_API_KEY || 
+    !process.env.CLOUDINARY_API_SECRET) {
+  console.warn('Cloudinary environment variables belum dikonfigurasi');
 }

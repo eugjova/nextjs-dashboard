@@ -323,7 +323,6 @@ export async function updateCustomer(formData: FormData) {
       };
     }
 
-    // Cek nomor telepon yang sudah ada (kecuali milik customer ini)
     const existingPhone = await sql`
       SELECT id FROM customers 
       WHERE phone = ${phone} AND id != ${id}
@@ -369,7 +368,6 @@ export async function updateCustomer(formData: FormData) {
       }
     }
 
-    // Update dengan atau tanpa image baru
     if (imageId) {
       await sql`
         UPDATE customers
@@ -432,7 +430,6 @@ export async function updateDistributors(formData: FormData) {
     const { id, name, phone } = validatedFields.data;
     const updatedAt = new Date().toISOString();
 
-    // Cek nomor telepon yang sudah ada (kecuali milik distributor ini)
     const existingPhone = await sql`
       SELECT id FROM distributors 
       WHERE phone = ${phone} AND id != ${id}
@@ -843,7 +840,6 @@ export async function createDistributors(formData: FormData) {
     const createdAt = new Date().toISOString();
     const updatedAt = createdAt;
 
-    // Cek nomor telepon yang sudah ada
     const existingPhone = await sql`
       SELECT id FROM distributors WHERE phone = ${phone}
     `;

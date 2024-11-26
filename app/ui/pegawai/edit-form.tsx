@@ -27,7 +27,7 @@ export default function EditForm({ pegawai, onClose }: EditFormProps) {
     phone: pegawai.phone,
     gender: pegawai.gender,
     email: pegawai.email,
-    password: '', // Password kosong saat edit
+    password: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -72,7 +72,6 @@ export default function EditForm({ pegawai, onClose }: EditFormProps) {
           <h3 className="text-lg font-semibold mb-4">Edit Pegawai</h3>
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
-              {/* Name field */}
               <div>
                 <label htmlFor="name" className="block text-sm font-medium">
                   Nama
@@ -91,7 +90,6 @@ export default function EditForm({ pegawai, onClose }: EditFormProps) {
                 </div>
               </div>
 
-              {/* Phone field */}
               <div>
                 <label htmlFor="phone" className="block text-sm font-medium">
                   Nomor Telepon
@@ -110,7 +108,6 @@ export default function EditForm({ pegawai, onClose }: EditFormProps) {
                 </div>
               </div>
 
-              {/* Gender field */}
               <div>
                 <label htmlFor="gender" className="block text-sm font-medium">
                   Gender
@@ -132,7 +129,6 @@ export default function EditForm({ pegawai, onClose }: EditFormProps) {
                 </div>
               </div>
 
-              {/* Email field */}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium">
                   Email
@@ -151,7 +147,6 @@ export default function EditForm({ pegawai, onClose }: EditFormProps) {
                 </div>
               </div>
 
-              {/* Password field */}
               <div>
                 <label htmlFor="password" className="block text-sm font-medium">
                   Password Baru (kosongkan jika tidak ingin mengubah)

@@ -4,23 +4,71 @@ import { roboto, oswald } from '@/app/ui/fonts';
 import {
   AtSymbolIcon,
   KeyIcon,
-  ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
 import { ArrowRightCircleIcon } from '@heroicons/react/20/solid';
 import { Button } from './button';
-import { useFormState, useFormStatus } from 'react-dom';
-import { authenticate } from '../lib/action';
+import { signIn } from 'next-auth/react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 
 export default function LoginForm() {
-  const [errorMessage, dispatch] = useFormState(authenticate, undefined);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const formData = new FormData(event.currentTarget);
+      const email = formData.get('email') as string;
+      const password = formData.get('password') as string;
+
+      if (!email || !password) {
+        setError('Email dan password harus diisi');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError('Email atau password salah');
+        toast.error('Email atau password salah');
+      } else if (result?.ok) {
+        toast.success('Login berhasil!');
+        router.push('/dashboard');
+        router.refresh();
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setError('Terjadi kesalahan sistem');
+      toast.error('Terjadi kesalahan sistem');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
-    <form action={dispatch} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-3">
       <div className="flex-1 rounded-lg bg-purple-700 bg-opacity-0 px-6 pb-4 pt-8">
-
         <h1 className={`${oswald.variable} mb-3 text-xl`}>
-          Please log in to continue.
+          Silakan login untuk melanjutkan.
         </h1>
+        
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-100 p-3 text-sm text-red-500">
+            {error}
+          </div>
+        )}
+
         <div className="w-full">
           <div>
             <label
@@ -35,8 +83,9 @@ export default function LoginForm() {
                 id="email"
                 type="email"
                 name="email"
-                placeholder="Enter your email address"
+                placeholder="Masukkan alamat email"
                 required
+                disabled={isSubmitting}
               />
               <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
             </div>
@@ -54,38 +103,26 @@ export default function LoginForm() {
                 id="password"
                 type="password"
                 name="password"
-                placeholder="Enter password"
+                placeholder="Masukkan password"
                 required
                 minLength={6}
+                disabled={isSubmitting}
               />
               <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
             </div>
           </div>
         </div>
-        <LoginButton />
-        <div
-          className="flex h-8 items-end space-x-1"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {errorMessage && (
-            <>
-              <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
-              <p className="text-sm text-red-500">{errorMessage}</p>
-            </>
-          )}
+        <div className="mt-4">
+          <Button
+            className="w-full"
+            aria-disabled={isSubmitting}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Sedang login...' : 'Login'}{' '}
+            <ArrowRightCircleIcon className="ml-auto h-5 w-5 text-gray-50" />
+          </Button>
         </div>
       </div>
     </form>
-  );
-}
-
-function LoginButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <Button className="mt-4 w-full" aria-disabled={pending}>
-      Log in <ArrowRightCircleIcon className="ml-auto h-5 w-5 text-gray-50" />
-    </Button>
   );
 }

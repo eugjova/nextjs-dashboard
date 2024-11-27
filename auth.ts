@@ -2,52 +2,70 @@ import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
-import { sql } from '@vercel/postgres';
-import type { Pegawai } from './app/lib/definitions';
-import bcrypt from 'bcrypt';
 
-async function getPegawai(email: string): Promise<Pegawai | undefined> {
-    try {
-        const pegawai = await sql<Pegawai>`SELECT * FROM pegawai WHERE email=${email}`;
-        return pegawai.rows[0];
-    } catch (error) {
-        console.error('Failed to fetch pegawai:', error);
-        throw new Error('Failed to fetch pegawai.');
-    }
-}
+export const { auth, handlers, signOut, signIn } = NextAuth({
+  ...authConfig,
+  providers: [
+    Credentials({
+      async authorize(credentials) {
+        try {
+          const parsedCredentials = z
+            .object({ 
+              email: z.string().email(), 
+              password: z.string().min(6) 
+            })
+            .safeParse(credentials);
 
-export const { auth, signIn, signOut } = NextAuth({
-    ...authConfig,
-    providers: [
-        Credentials({
-            async authorize(credentials) {
-                const parsedCredentials = z
-                    .object({ email: z.string().email(), password: z.string().min(6) })
-                    .safeParse(credentials);
+          if (!parsedCredentials.success) {
+            return null;
+          }
 
-                if (parsedCredentials.success) {
-                //   console.log('Credentials parsed successfully');
-                    const { email, password } = parsedCredentials.data;
-                    // console.log('Email:', email);
-                    // console.log('Password (plaintext):', password);
+          const { email, password } = parsedCredentials.data;
 
-                    const pegawai = await getPegawai(email);
-                    console.log('Retrieved pegawai:', pegawai);
+          const baseUrl = process.env.NEXTAUTH_URL;
+          if (!baseUrl) {
+            throw new Error('NEXTAUTH_URL must be set');
+          }
 
-                    if (!pegawai) {
-                      console.log('No pegawai found for the given email');
-                      return null;
-                    }
+          const response = await fetch(`${baseUrl}/api/auth/verify-credentials`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+          });
 
-                    const passwordsMatch = await bcrypt.compare(password, pegawai.password);
-                     console.log('Do passwords match?', passwordsMatch);
+          if (!response.ok) {
+            return null;
+          }
 
-                    if (passwordsMatch) return pegawai;
-                }
-
-                console.log('Invalid credentials');
-                return null;
-            },
-        }),
-    ],
+          const user = await response.json();
+          return user;
+        } catch (error) {
+          console.error('Auth error:', error);
+          return null;
+        }
+      },
+    }),
+  ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string;
+        session.user.email = token.email as string;
+        session.user.name = token.name as string;
+      }
+      return session;
+    },
+  },
+  pages: {
+    signIn: '/login',
+    signOut: '/',
+  },
 });

@@ -1,7 +1,6 @@
 import type { NextAuthConfig } from 'next-auth';
  
 export const authConfig = {
-  secret: process.env.NEXTAUTH_SECRET, // Gunakan secret dari environment variable
   pages: {
     signIn: '/login',
   },
@@ -9,14 +8,18 @@ export const authConfig = {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
+      
       if (isOnDashboard) {
-        if (isLoggedIn) return true ;
-        return true; // Redirect unauthenticated users to login page
-      } else if (isLoggedIn) {
+        if (isLoggedIn) return true;
+        return false;
+      }
+      
+      if (isLoggedIn && nextUrl.pathname === '/login') {
         return Response.redirect(new URL('/dashboard', nextUrl));
       }
+      
       return true;
     },
   },
-  providers: [], // Add providers with an empty array for now
+  providers: [],
 } satisfies NextAuthConfig;

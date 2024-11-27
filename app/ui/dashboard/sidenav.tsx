@@ -13,12 +13,14 @@ import {
   UserCircleIcon,
   ChevronDownIcon
 } from '@heroicons/react/24/outline';
-import { signOut } from '@/authServer';
+import { logout } from '@/authServer';
 import Image from 'next/image';
 import { oswald, roboto } from '@/app/ui/fonts';
+import { useSession } from 'next-auth/react';
 
 export default function SideNav() {
-  const [collapsed, setCollapsed] = useState(true);
+  const { data: session } = useSession();
+  const [collapsed, setCollapsed] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
 
@@ -41,7 +43,11 @@ export default function SideNav() {
   };
 
   const handleSignOut = async () => {
-    await signOut();
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const EnglishIcon = (
@@ -116,25 +122,43 @@ export default function SideNav() {
                   </ul>
                 </div>
               )}
-              <div className={`${oswald.variable} flex items-center ml-2 cursor-pointer`} onClick={toggleUserDropdown}>
-                <UserCircleIcon className='w-10' />
-                <p className="text-[18px] text-bold p-0 ml-1">User</p>
-                <ChevronDownIcon className='w-5 ml-2 hover:text-purple-600' />
-              </div>
-              {userDropdownOpen && (
-                <div className="absolute top-16 right-2 bg-black rounded-lg shadow-md p-2 border border-purple-900">
-                  <ul>
-                    <div className={`${roboto.variable} text-sm p-2 hover:bg-white-800 hover:text-purple-500 cursor-pointer`}>Information</div>
-                    <div className={`${roboto.variable} text-sm p-2 hover:bg-gray-800 hover:text-purple-500 cursor-pointer`}>Settings</div>
-                    <div
-                      className={`${roboto.variable} text-sm p-2 hover:bg-gray-800 hover:text-purple-500 cursor-pointer`}
-                      onClick={handleSignOut}
-                    >
-                      Sign Out
-                    </div>
-                  </ul>
+              <div className="relative">
+                <div 
+                  className={`${oswald.variable} flex items-center ml-2 cursor-pointer hover:bg-gray-100 rounded-lg px-2 py-1`} 
+                  onClick={toggleUserDropdown}
+                >
+                  <UserCircleIcon className='w-10 text-gray-600' />
+                  <p className="text-[18px] text-bold p-0 ml-1">
+                    {session?.user?.name || 'Loading...'}
+                  </p>
+                  <ChevronDownIcon className='w-5 ml-2 text-gray-600' />
                 </div>
-              )}
+
+                {userDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
+                    <div className="px-4 py-2 border-b border-gray-200">
+                      <p className="text-sm font-medium text-gray-900">{session?.user?.name}</p>
+                      <p className="text-sm text-gray-500 truncate">{session?.user?.email}</p>
+                    </div>
+                    
+                    <div className="py-1">
+                      <button
+                        onClick={() => {/* handle settings */}}
+                        className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                      >
+                        Settings
+                      </button>
+                      
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 text-left"
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </nav>

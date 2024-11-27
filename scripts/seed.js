@@ -182,11 +182,9 @@ async function seedDistributors(client) {
 async function seedProducts(client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
-    
-    // Drop existing table if exists
+
     await client.sql`DROP TABLE IF EXISTS products CASCADE`;
-    
-    // Create products table dengan kolom image_url sebagai TEXT
+
     const createTable = await client.sql`
       CREATE TABLE IF NOT EXISTS products (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -202,7 +200,6 @@ async function seedProducts(client) {
 
     console.log(`Created "products" table`);
 
-    // Insert seed data
     const insertedProducts = await Promise.all(
       products.map(
         (product) => client.sql`
@@ -439,7 +436,6 @@ async function seedRevenue(client) {
 async function main() {
   const client = await db.connect();
 
-  // Drop tables in correct order
   await client.sql`DROP TABLE IF EXISTS penjualan_items CASCADE`;
   await client.sql`DROP TABLE IF EXISTS penjualan CASCADE`;
   await client.sql`DROP TABLE IF EXISTS pembelian CASCADE`;
@@ -450,7 +446,6 @@ async function main() {
   await client.sql`DROP TABLE IF EXISTS pegawai CASCADE`;
   await client.sql`DROP TABLE IF EXISTS roles CASCADE`;
 
-  // Seed tables in correct order
   await seedRoles(client);
   await seedPegawai(client);
   await seedCustomers(client);

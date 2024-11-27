@@ -28,7 +28,6 @@ export function ProductsTableSkeleton() {
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
           <div className="md:hidden">
-            {/* Skeleton untuk tampilan mobile */}
             {[...Array(5)].map((_, i) => (
               <div
                 key={i}
@@ -39,7 +38,6 @@ export function ProductsTableSkeleton() {
           <table className="hidden min-w-full text-gray-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
-                {/* Header skeleton */}
                 {[...Array(6)].map((_, i) => (
                   <th key={i} scope="col" className="px-4 py-5">
                     <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
@@ -48,7 +46,6 @@ export function ProductsTableSkeleton() {
               </tr>
             </thead>
             <tbody>
-              {/* Baris tabel skeleton */}
               {[...Array(6)].map((_, i) => (
                 <tr key={i}>
                   {[...Array(6)].map((_, j) => (
@@ -70,7 +67,6 @@ export function DashboardSkeleton() {
   return (
     <>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Card skeletons */}
         {[...Array(4)].map((_, i) => (
           <div
             key={i}
@@ -87,12 +83,10 @@ export function DashboardSkeleton() {
         ))}
       </div>
       
-      {/* Revenue Chart skeleton */}
       <div className="mt-6 rounded-xl bg-gray-50 p-4">
         <div className="h-[240px] bg-gray-200 rounded-lg animate-pulse" />
       </div>
 
-      {/* Latest Invoices skeleton */}
       <div className="mt-6 rounded-xl bg-gray-50 p-4">
         <div className="space-y-4">
           <div className="h-8 w-36 bg-gray-200 rounded animate-pulse" />

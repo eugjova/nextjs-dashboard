@@ -11,7 +11,7 @@ export function CreatePegawai() {
   return (
     <Link
       href="/dashboard/pegawai/create"
-      className="flex h-10 items-center rounded-lg bg-purple-600 px-4 text-sm font-medium text-white transition-colors hover:bg-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+      className="flex h-10 items-center rounded-lg bg-red-600 px-4 text-sm font-medium text-white transition-colors hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
     >
       <span className="hidden md:block">Create Pegawai</span>{' '}
       <PlusIcon className="h-5 md:ml-4" />
@@ -27,7 +27,7 @@ export function UpdatePegawai({ pegawai }: { pegawai: PegawaiForm }) {
       <button
         type="button"
         onClick={() => setShowEditModal(true)}
-        className="rounded-md border p-2 hover:bg-yellow-500"
+        className="rounded-md border p-2 hover:bg-red-100"
       >
         <PencilIcon className="w-5" />
       </button>

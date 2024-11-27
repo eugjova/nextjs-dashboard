@@ -14,6 +14,19 @@ const nextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    config.module.rules.push({
+      test: /\.html$/,
+      loader: 'ignore-loader'
+    });
+
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@mapbox/node-pre-gyp': false,
+    };
+
+    return config;
+  },
 };
 
 module.exports = nextConfig;

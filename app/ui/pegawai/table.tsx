@@ -8,13 +8,16 @@ import {
 } from '@/app/lib/definitions';
 import { pegawai } from '@/app/lib/placeholder-data';
 import { fetchFilteredPegawai } from '@/app/lib/data';
+import Pagination from '@/app/ui/pegawai/pagination';
 
 export default async function PegawaiTable({
   query,
-  currentPage
+  currentPage,
+  totalPages,
 }: {
   query: string;
   currentPage: number;
+  totalPages: number;
 }) {
   const pegawai = await fetchFilteredPegawai(query, currentPage);
   return (
@@ -33,13 +36,6 @@ export default async function PegawaiTable({
                       <div>
                         <div className="mb-2 flex items-center">
                           <div className="flex items-center gap-3">
-                            {/* <Image
-                              src={pegawai.image_url}
-                              className="rounded-full"
-                              alt={`${pegawai.name}'s profile picture`}
-                              width={28}
-                              height={28}
-                            /> */}
                             <p>{pegawai.name}</p>
                           </div>
                         </div>
@@ -69,9 +65,6 @@ export default async function PegawaiTable({
                         <p className="font-medium">{'•'.repeat(10)}</p>
                       </div>
                     </div>
-                    {/* <div className="pt-4 text-sm">
-                      <p>{pegawai.total_invoices} invoices</p>
-                    </div> */}
                    </div>
                 ))}
               </div>
@@ -101,13 +94,6 @@ export default async function PegawaiTable({
                     <tr key={pegawai.id} className="group">
                       <td className="whitespace-nowrap py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6 ">
                         <div className="flex items-center gap-3">
-                          {/* <Image
-                            src={pegawai.image_url}
-                            className="rounded-full"
-                            alt={`${pegawai.name}'s profile picture`}
-                            width={28}
-                            height={28}
-                          /> */}
                           <p>{pegawai.name}</p>
                         </div>
                       </td>
@@ -123,9 +109,6 @@ export default async function PegawaiTable({
                       <td className="whitespace-nowrap px-4 py-5 text-sm">
                         {'•'.repeat(10)}
                       </td>
-                      {/* <td className="whitespace-nowrap px-4 py-5 text-sm group-first-of-type:rounded-md group-last-of-type:rounded-md">
-                        {pegawai.total_paid}
-                      </td> */}
                       <td className="whitespace-nowrap py-3 pl-6 pr-3">
                         <div className="flex justify-end gap-3">
                           <UpdatePegawai pegawai={pegawai} />
@@ -139,6 +122,9 @@ export default async function PegawaiTable({
             </div>
           </div>
         </div>
+      </div>
+      <div className="mt-5 flex w-full justify-center">
+        <Pagination totalPages={totalPages} />
       </div>
     </div>
   );

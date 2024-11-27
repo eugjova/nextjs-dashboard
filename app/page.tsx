@@ -1,14 +1,12 @@
-// import AtmaLogo from '@/app/ui/atma-logo';
 import { InboxStackIcon, UserIcon } from '@heroicons/react/24/outline';
 import {
   ArrowRightCircleIcon,
   PhoneIcon,
   BuildingOffice2Icon,
-  EnvelopeIcon
 } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import '@/app/ui/global.css';
-import { kanit, lusitana, oswald, roboto } from '@/app/ui/fonts';
+import { oswald, roboto } from '@/app/ui/fonts';
 import Image from 'next/image';
 import { Metadata} from 'next';
 
@@ -97,7 +95,7 @@ export default function Page() {
           <div className="flex justify-end relative mt-6">
             <Link
               href="/dashboard"
-              className="flex items-center px-8 py-3 text-xl text-white transition duration-700 ease-out bg-gradient-to-r from-red-700 to-red-400 rounded-full hover:from-red-900 hover:to-red-600 hidden md:inline-flex"
+              className="flex items-center px-8 py-3 text-xl text-white transition duration-700 ease-out bg-gradient-to-r from-red-700 to-red-400 rounded-full hover:from-red-900 hover:to-red-600 md:inline-flex"
             >
               <span className={`${roboto.variable} font-bold hidden md:block mr-2`}>Dashboard</span>
               <ArrowRightCircleIcon className="w-6" />

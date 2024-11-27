@@ -1,4 +1,4 @@
-import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { deleteInvoice as deletePembelian } from '@/app/lib/action';
 
@@ -13,17 +13,6 @@ export function CreatePembelian() {
     </Link>
   );
 }
-
-// export function UpdateInvoice({ id }: { id: string }) {
-//   return (
-//     <Link
-//       href={`/dashboard/invoices/${id}/edit`}
-//       className="rounded-md border p-2 hover:bg-gray-100"
-//     >
-//       <PencilIcon className="w-5" />
-//     </Link>
-//   );
-// }
 
 export function DeletePembelian({ id }: { id: string }) {
   const deletePembelianWithId = deletePembelian.bind(null, id);

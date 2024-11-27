@@ -28,14 +28,9 @@ import { distributors, penjualan, products, } from './placeholder-data';
 import { error } from 'console';
 
 export async function fetchRevenue() {
-  // Add noStore() here to prevent the response from being cached.
-  // This is equivalent to in fetch(..., {cache: 'no-store'}).
   noStore();
 
   try {
-    // Artificially delay a response for demo purposes.
-    // Don't do this in production :)
-
     console.log('Fetching revenue data...');
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
@@ -74,9 +69,6 @@ export async function fetchLatestPenjualan() {
 export async function fetchCardData() {
   noStore();
   try {
-    // You can probably combine these into a single SQL query
-    // However, we are intentionally splitting them to demonstrate
-    // how to initialize multiple queries in parallel with JS.
     const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
     const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
     const invoiceStatusPromise = sql`SELECT
@@ -328,7 +320,6 @@ export async function fetchLatestCustomers() {
 
     const customers = data.rows.map((customer) => ({
       ...customer,
-      // Add any additional fields you want to format here
     }));
     return customers;
   } catch (err) {
@@ -418,37 +409,43 @@ export async function fetchCustomerById(id: string) {
 }
 
 
-export async function fetchFilteredPegawai(
-  query: string,
-  currentPage: number,
-) {
-  const ITEMS_PER_PAGE = 10;
+export async function fetchFilteredPegawai(query: string, currentPage: number) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-  noStore();
+
   try {
-    const data = await sql<PegawaiTableType>`
-		SELECT
-		  pegawai.id,
-		  pegawai.name,
-		  pegawai.phone,
-      pegawai.gender,
-      pegawai.email,
-      pegawai.password 
-    FROM pegawai
-    WHERE name ILIKE ${`%${query}%`} OR phone::text ILIKE ${`%${query}%`}
-    GROUP BY pegawai.id, pegawai.name, pegawai.phone
-		ORDER BY pegawai.name ASC
-    LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
-	  `;
+    const pegawai = await sql<PegawaiTableType>`
+      SELECT *
+      FROM pegawai
+      WHERE
+        name ILIKE ${`%${query}%`} OR
+        email ILIKE ${`%${query}%`} OR
+        phone ILIKE ${`%${query}%`}
+      ORDER BY name ASC
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+    `;
+    return pegawai.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch pegawai data.');
+  }
+}
 
-    const pegawai = data.rows.map((pegawai) => ({
-      ...pegawai,
-    }));
+export async function fetchPegawaiPages(query: string) {
+  try {
+    const count = await sql`
+      SELECT COUNT(*)
+      FROM pegawai
+      WHERE
+        name ILIKE ${`%${query}%`} OR
+        email ILIKE ${`%${query}%`} OR
+        phone ILIKE ${`%${query}%`}
+    `;
 
-    return pegawai;
-  } catch (err) {
-    console.error('Database Error:', err);
-    throw new Error('Failed to fetch pegawai table.');
+    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of pegawai.');
   }
 }
 

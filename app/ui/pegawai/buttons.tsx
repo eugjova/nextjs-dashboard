@@ -1,23 +1,10 @@
 'use client'
 
-import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { deletePegawai } from '@/app/lib/action';
 import { useState } from 'react';
 import EditForm from './edit-form';
 import { PegawaiForm } from '@/app/lib/definitions';
- 
-export function CreatePegawai() {
-  return (
-    <Link
-      href="/dashboard/pegawai/create"
-      className="flex h-10 items-center rounded-lg bg-red-600 px-4 text-sm font-medium text-white transition-colors hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
-    >
-      <span className="hidden md:block">Create Pegawai</span>{' '}
-      <PlusIcon className="h-5 md:ml-4" />
-    </Link>
-  );
-}
  
 export function UpdatePegawai({ pegawai }: { pegawai: PegawaiForm }) {
   const [showEditModal, setShowEditModal] = useState(false);

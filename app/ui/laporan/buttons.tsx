@@ -2,7 +2,6 @@
 
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import * as XLSX from 'xlsx';
-import { fetchFilteredPenjualan, fetchFilteredPembelian } from '@/app/lib/data';
 
 export function ExportButton({ 
   type,

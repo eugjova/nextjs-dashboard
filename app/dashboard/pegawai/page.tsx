@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { fetchPegawaiPages } from '@/app/lib/data';
 import PegawaiTable from '@/app/ui/pegawai/table';
-import { CreatePegawai } from '@/app/ui/pegawai/buttons';
+import Form from '@/app/ui/pegawai/create-form';
 import Search from '@/app/ui/search';
 import { oswald } from '@/app/ui/fonts';
 import {
@@ -28,7 +28,7 @@ export default async function Page({
           <Search placeholder="Cari pegawai..." />
         </Suspense>
         <Suspense fallback={<CreateSkeleton />}>
-          <CreatePegawai />
+          <Form />
         </Suspense>
       </div>
       <div className="mt flow-root">

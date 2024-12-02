@@ -36,6 +36,7 @@ export default function Form() {
         toast.success('Pegawai berhasil dibuat!');
         setModal(false);
         formRef.current?.reset();
+        window.location.reload();
       } else {
         toast.error(result.error || 'Gagal membuat pegawai');
       }
@@ -48,11 +49,12 @@ export default function Form() {
   }
 
   return (
-    <div className="flex items-start justify-center">
+    <div className="flex items-center justify-center">
       <button
         type="button"
-        className="flex h-10 items-center rounded-lg bg-red-600 px-4 text-sm font-medium text-white transition-colors hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+        className="flex h-10 items-center rounded-lg bg-red-600 px-4 text-sm font-medium text-white transition-colors hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
         onClick={handleChange}
+        disabled={isSubmitting}
       >
         <span className="hidden md:block">Create Pegawai</span>{' '}
         <PlusIcon className="h-5 md:ml-4" />

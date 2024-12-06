@@ -509,7 +509,6 @@ export async function createPegawai(formData: FormData) {
     });
 
     if (!validatedFields.success) {
-      console.error('Validation errors:', validatedFields.error.flatten());
       return {
         success: false,
         error: validatedFields.error.errors[0].message || 'Data tidak valid. Periksa kembali input Anda.'
@@ -518,6 +517,7 @@ export async function createPegawai(formData: FormData) {
 
     const { name, phone, gender, email, password } = validatedFields.data;
     
+    // Cek email yang sudah ada
     const existingEmail = await sql`
       SELECT id FROM pegawai WHERE email = ${email}
     `;
@@ -529,6 +529,7 @@ export async function createPegawai(formData: FormData) {
       };
     }
 
+    // Cek nomor telepon yang sudah ada
     const existingPhone = await sql`
       SELECT id FROM pegawai WHERE phone = ${phone}
     `;
@@ -541,9 +542,21 @@ export async function createPegawai(formData: FormData) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const id = crypto.randomUUID();
-    const id_role = "123e4567-e89b-12d3-a456-426614174000";
+    
+    // Ambil id_role pegawai
+    const roleData = await sql`
+      SELECT id FROM roles WHERE name = 'Pegawai' LIMIT 1
+    `;
+    
+    if (roleData.rows.length === 0) {
+      return {
+        success: false,
+        error: 'Role pegawai tidak ditemukan'
+      };
+    }
+    
+    const id_role = roleData.rows[0].id;
     const currentDate = new Date().toISOString();
 
     await sql`

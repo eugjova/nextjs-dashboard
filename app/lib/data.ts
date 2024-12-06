@@ -414,19 +414,27 @@ export async function fetchFilteredPegawai(query: string, currentPage: number) {
 
   try {
     const pegawai = await sql<PegawaiTableType>`
-      SELECT *
-      FROM pegawai
+      SELECT 
+        p.id,
+        p.name,
+        p.phone,
+        p.gender,
+        p.email,
+        p.password,
+        r.name as role_name
+      FROM pegawai p
+      JOIN roles r ON p.id_role = r.id
       WHERE
-        name ILIKE ${`%${query}%`} OR
-        email ILIKE ${`%${query}%`} OR
-        phone ILIKE ${`%${query}%`}
-      ORDER BY name ASC
+        p.name ILIKE ${`%${query}%`} OR
+        p.email ILIKE ${`%${query}%`} OR
+        p.phone ILIKE ${`%${query}%`}
+      ORDER BY p.name ASC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
     return pegawai.rows;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch pegawai data.');
+    throw new Error('Failed to fetch filtered pegawai.');
   }
 }
 
@@ -817,6 +825,26 @@ export async function fetchLaporanPembelianPages(query: string, startDate?: stri
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch total pages.');
+  }
+}
+
+export async function fetchPegawaiRole() {
+  try {
+    const data = await sql`
+      SELECT id 
+      FROM roles 
+      WHERE name = 'Pegawai'
+      LIMIT 1
+    `;
+    
+    if (data.rows.length === 0) {
+      throw new Error('Role pegawai tidak ditemukan');
+    }
+    
+    return data.rows[0].id;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch pegawai role.');
   }
 }
 

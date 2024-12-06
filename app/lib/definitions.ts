@@ -152,6 +152,7 @@ export type PegawaiTableType = {
   gender: string;
   email: string;
   password: string;
+  role_name: string;
 };
 
 export interface PegawaiForm {
@@ -161,6 +162,7 @@ export interface PegawaiForm {
   gender: string;
   email: string;
   password: string;
+  role_name: string;
 }
 
 export type FormattedCustomersTable = {

@@ -1,20 +1,16 @@
 require('dotenv').config();
 const { db } = require('@vercel/postgres');
 const bcrypt = require('bcrypt');
-const formatDate = (date) => date.toISOString().split('T')[0];
 const {
   roles,
   customers,
   distributors,
   pegawai,
-  revenue,
   products,
   penjualan,
   penjualan_items,
   pembelian,
-  stock,
 } = require('../app/lib/placeholder-data.js');
-
  
 async function seedRoles(client) {
   try {
@@ -60,25 +56,22 @@ async function seedCustomers(client) {
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         phone VARCHAR(255) NOT NULL,
-        createdAt DATE DEFAULT CURRENT_DATE,
-        updatedAt DATE DEFAULT CURRENT_DATE,
+        createdAt DATE NOT NULL,
+        updatedAt DATE NOT NULL,
         gender VARCHAR(255) NOT NULL,
-        poin INT NOT NULL,
-        image_url VARCHAR(255) NOT NULL
+        poin INTEGER NOT NULL DEFAULT 0,
+        image_url TEXT NOT NULL
       );
     `;
  
     console.log(`Created "customers" table`);
  
-    const currentDate = formatDate(new (Date))
- 
     const insertedCustomers = await Promise.all(
       customers.map(
         (customer) => client.sql`
         INSERT INTO customers (id, name, phone, createdAt, updatedAt, gender, poin, image_url)
-        VALUES (${customer.id}, ${customer.name}, ${customer.phone}, ${currentDate}, ${currentDate},  ${customer.gender}, ${customer.poin}, ${customer.image_url})
+        VALUES (${customer.id}, ${customer.name}, ${customer.phone}, ${customer.createdAt}, ${customer.updatedAt}, ${customer.gender}, ${customer.poin}, ${customer.image_url})
         ON CONFLICT (id) DO NOTHING;
-     
       `,
       ),
     );
@@ -90,7 +83,7 @@ async function seedCustomers(client) {
       customers: insertedCustomers,
     };
   } catch (error) {
-    console.error('Error seeding : customers', error);
+    console.error('Error seeding customers:', error);
     throw error;
   }
 }
@@ -238,66 +231,73 @@ async function seedProducts(client) {
  
 async function seedPenjualan(client) {
   try {
-    await client.sql`CREATE TABLE IF NOT EXISTS penjualan (
-      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-      customerId UUID NOT NULL,
-      pegawaiId UUID NOT NULL,
-      date DATE NOT NULL,
-      poin_used INTEGER NOT NULL DEFAULT 0,
-      total_amount INTEGER NOT NULL,
-      total_bayar INTEGER NOT NULL,
-      FOREIGN KEY (customerId) REFERENCES customers(id),
-      FOREIGN KEY (pegawaiId) REFERENCES pegawai(id)
-    );`;
+    const createTable = await client.sql`
+      CREATE TABLE IF NOT EXISTS penjualan (
+        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+        date DATE NOT NULL,
+        customerId UUID NOT NULL REFERENCES customers(id),
+        pegawaiId UUID NOT NULL REFERENCES pegawai(id),
+        total_items INTEGER NOT NULL,
+        total_amount INTEGER NOT NULL,
+        poin_used INTEGER NOT NULL DEFAULT 0,
+        total_bayar INTEGER NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
 
-    await client.sql`CREATE TABLE IF NOT EXISTS penjualan_items (
-      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-      penjualan_id UUID NOT NULL,
-      product_id UUID NOT NULL,
-      quantity INTEGER NOT NULL,
-      price_per_item INTEGER NOT NULL,
-      subtotal INTEGER NOT NULL,
-      FOREIGN KEY (penjualan_id) REFERENCES penjualan(id),
-      FOREIGN KEY (product_id) REFERENCES products(id)
-    );`;
+    await client.sql`
+      CREATE TABLE IF NOT EXISTS penjualan_items (
+        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+        penjualan_id UUID NOT NULL REFERENCES penjualan(id),
+        product_id UUID NOT NULL REFERENCES products(id),
+        quantity INTEGER NOT NULL,
+        price_per_item INTEGER NOT NULL,
+        subtotal INTEGER NOT NULL
+      );
+    `;
+
+    console.log(`Created "penjualan" and "penjualan_items" tables`);
 
     const insertedPenjualan = await Promise.all(
-      penjualan.map(async (penjualan) => {
-        return client.sql`
-          INSERT INTO penjualan (
-            id, customerId, pegawaiId, date, poin_used, total_amount, total_bayar
-          )
-          VALUES (
-            ${penjualan.id}, ${penjualan.customerId}, ${penjualan.pegawaiId},
-            ${penjualan.date}, ${penjualan.poin_used}, ${penjualan.total_amount},
-            ${penjualan.total_bayar}
-          )
-          ON CONFLICT (id) DO NOTHING;
-        `;
-      })
+      penjualan.map(
+        (penjualan) => client.sql`
+        INSERT INTO penjualan (
+          id, date, customerId, pegawaiId, 
+          total_items, total_amount, poin_used, 
+          total_bayar
+        )
+        VALUES (
+          ${penjualan.id}, ${penjualan.date}, 
+          ${penjualan.customerId}, ${penjualan.pegawaiId},
+          ${penjualan.total_items}, ${penjualan.total_amount}, 
+          ${penjualan.poin_used}, ${penjualan.total_bayar}
+        )
+        ON CONFLICT (id) DO NOTHING;
+      `,
+      ),
     );
 
     const insertedItems = await Promise.all(
-      penjualan_items.map(async (item) => {
-        return client.sql`
-          INSERT INTO penjualan_items (
-            id, penjualan_id, product_id, quantity, price_per_item, subtotal
-          )
-          VALUES (
-            ${item.id}, ${item.penjualan_id}, ${item.product_id},
-            ${item.quantity}, ${item.price_per_item}, ${item.subtotal}
-          )
-          ON CONFLICT (id) DO NOTHING;
-        `;
-      })
+      penjualan_items.map(
+        (item) => client.sql`
+        INSERT INTO penjualan_items (
+          id, penjualan_id, product_id, 
+          quantity, price_per_item, subtotal
+        )
+        VALUES (
+          ${item.id}, ${item.penjualan_id}, ${item.product_id},
+          ${item.quantity}, ${item.price_per_item}, ${item.subtotal}
+        )
+        ON CONFLICT (id) DO NOTHING;
+      `,
+      ),
     );
 
-    console.log(`Created "penjualan" and "penjualan_items" tables`);
     console.log(`Seeded ${insertedPenjualan.length} penjualan`);
     console.log(`Seeded ${insertedItems.length} penjualan items`);
 
     return {
-      createTable: true,
+      createTable,
       penjualan: insertedPenjualan,
       items: insertedItems,
     };
@@ -363,83 +363,12 @@ async function seedPembelian(client) {
   }
 }
  
- 
-async function seedStock(client) {
-  try {
-    await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
- 
-    const createTable = await client.sql`
-      CREATE TABLE IF NOT EXISTS stock (
-        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-        id_produk UUID NOT NULL,
-        jumlah INT NOT NULL
-      );
-    `;
- 
-    console.log(`Created "stock" table`);
- 
-    const insertedStock = await Promise.all(
-      stock.map(
-        (stock) => client.sql`
-        INSERT INTO stock (id, id_produk, jumlah)
-        VALUES (${stock.id}, ${stock.id_produk}, ${stock.jumlah})
-        ON CONFLICT (id) DO NOTHING;
-      `,
-      ),
-    );
- 
-    console.log(`Seeded ${insertedStock.length} stock`);
- 
-    return {
-      createTable,
-      stock : insertedStock,
-    };
-  } catch (error) {
-    console.error('Error seeding stock:', error);
-    throw error;
-  }
-}
- 
-async function seedRevenue(client) {
-  try {
-    const createTable = await client.sql`
-      CREATE TABLE IF NOT EXISTS revenue (
-        month VARCHAR(4) NOT NULL UNIQUE,
-        revenue INT NOT NULL
-      );
-    `;
- 
-    console.log(`Created "revenue" table`);
- 
-    const insertedRevenue = await Promise.all(
-      revenue.map(
-        (rev) => client.sql`
-        INSERT INTO revenue (month, revenue)
-        VALUES (${rev.month}, ${rev.revenue})
-        ON CONFLICT (month) DO NOTHING;
-      `,
-      ),
-    );
- 
-    console.log(`Seeded ${insertedRevenue.length} revenue`);
- 
-    return {
-      createTable,
-      revenue: insertedRevenue,
-    };
-  } catch (error) {
-    console.error('Error seeding revenue:', error);
-    throw error;
-  }
-}
- 
 async function main() {
   const client = await db.connect();
 
   await client.sql`DROP TABLE IF EXISTS penjualan_items CASCADE`;
   await client.sql`DROP TABLE IF EXISTS penjualan CASCADE`;
   await client.sql`DROP TABLE IF EXISTS pembelian CASCADE`;
-  await client.sql`DROP TABLE IF EXISTS stock CASCADE`;
   await client.sql`DROP TABLE IF EXISTS products CASCADE`;
   await client.sql`DROP TABLE IF EXISTS customers CASCADE`;
   await client.sql`DROP TABLE IF EXISTS distributors CASCADE`;
@@ -453,8 +382,6 @@ async function main() {
   await seedProducts(client);
   await seedPembelian(client);
   await seedPenjualan(client);
-  await seedStock(client);
-  await seedRevenue(client);
 
   await client.end();
 }

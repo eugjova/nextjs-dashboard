@@ -80,10 +80,6 @@ export default function ProductsTable({
     }
   }, [isRefetching, loadProducts]);
 
-  useEffect(() => {
-    console.log('Editing product:', editingProduct);
-  }, [editingProduct]);
-
   if (isLoading || isRefetching) {
     return (
       <div className="mt-6 flow-root">

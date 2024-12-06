@@ -143,7 +143,7 @@ export default function SideNav() {
                     
                     <div className="py-1">
                       <button
-                        onClick={() => {/* handle settings */}}
+                        onClick={() => {}}
                         className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
                       >
                         Settings

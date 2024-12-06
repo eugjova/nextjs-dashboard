@@ -7,15 +7,11 @@ import {
   CustomersForm,
   LatestCustomer,
   PenjualanForm,
-  PenjualanTable,
   LatestPenjualanRaw,
-  Roles,
-  Revenue,
   ProductsTable,
   ProductForm,
   ProductsTableType,
   DistributorField,
-  DistributorTableType,
   DistributorForm,
   Pegawai,
   PegawaiField,
@@ -24,26 +20,6 @@ import {
 } from './definitions';
 import { unstable_noStore as noStore } from 'next/cache';
 import { formatCurrency } from './utils';
-import { distributors, penjualan, products, } from './placeholder-data';
-import { error } from 'console';
-
-export async function fetchRevenue() {
-  noStore();
-
-  try {
-    console.log('Fetching revenue data...');
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    const data = await sql<Revenue>`SELECT * FROM revenue`;
-
-    console.log('Data fetch completed after 3 seconds.');
-
-    return data.rows;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch revenue data.');
-  }
-}
 
 export async function fetchLatestPenjualan() {
   noStore();
@@ -362,7 +338,6 @@ export async function fetchFilteredCustomers(
   }
 }
 
-
 export async function fetchCustomersPages(query: string) {
   noStore();
   try {
@@ -400,14 +375,12 @@ export async function fetchCustomerById(id: string) {
     const customers = data.rows.map((customer) => ({
       ...customer,
     }));
-    console.log(customers);
     return customers[0];
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch customer.');
   }
 }
-
 
 export async function fetchFilteredPegawai(query: string, currentPage: number) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -473,7 +446,6 @@ export async function fetchPegawaiById(id: string) {
     `;
  
     const pegawai = data.rows[0];
-    console.log(pegawai);
     return pegawai;
   } catch (error) {
     console.error('Database Error:', error);
@@ -523,7 +495,6 @@ export async function fetchFilteredDistributors(
   }
 }
 
-
 export async function fetchDistributorPages(query: string) {
   noStore();
   try {
@@ -554,7 +525,6 @@ export async function fetchDistributorById(id: string) {
     `;
  
     const distributors = data.rows[0];
-    console.log(distributors);
     return distributors;
   } catch (error) {
     console.error('Database Error:', error);
@@ -648,7 +618,6 @@ export async function fetchProductsById(id: string) {
 
     const product = data.rows[0];
 
-    console.log(product);
     return product;
   } catch (error) {
     console.error('Database Error:', error);
@@ -848,5 +817,70 @@ export async function fetchPegawaiRole() {
   }
 }
 
+export async function fetchDashboardData() {
+  try {
+    const data = await sql`
+      SELECT 
+        (SELECT COUNT(*) FROM customers) as total_customers,
+        (SELECT COALESCE(SUM(total_bayar), 0) FROM penjualan) as total_penjualan,
+        (SELECT COUNT(*) FROM customers WHERE createdat >= NOW() - INTERVAL '1 month') as new_customers,
+        (SELECT COUNT(*) FROM penjualan WHERE date >= NOW() - INTERVAL '1 month') as recent_transactions
+    `;
+    
+    return {
+      totalCustomers: Number(data.rows[0].total_customers),
+      totalPenjualan: Number(data.rows[0].total_penjualan),
+      newCustomers: Number(data.rows[0].new_customers),
+      recentTransactions: Number(data.rows[0].recent_transactions)
+    };
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch dashboard data.');
+  }
+}
 
+export async function fetchRevenueData() {
+  noStore();
+  try {
+    const data = await sql<{ month: string; total: number }>`
+      WITH monthly_data AS (
+        SELECT 
+          DATE_TRUNC('month', date) as month_date,
+          COALESCE(SUM(total_bayar), 0) as total
+        FROM penjualan
+        WHERE date >= NOW() - INTERVAL '7 months'
+        GROUP BY DATE_TRUNC('month', date)
+      )
+      SELECT 
+        TO_CHAR(month_date, 'YYYY-MM-DD') as month,
+        total::integer
+      FROM monthly_data
+      ORDER BY month_date ASC
+    `;
 
+    return data.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch revenue data.');
+  }
+}
+
+export async function fetchCustomerGrowthData() {
+  try {
+    const data = await sql<{ month: string; total: number }>`
+      SELECT 
+        DATE_TRUNC('month', createdat)::text as month,
+        COUNT(*)::integer as total
+      FROM customers
+      WHERE createdat >= NOW() - INTERVAL '7 months'
+      GROUP BY DATE_TRUNC('month', createdat)
+      ORDER BY month DESC
+      LIMIT 7
+    `;
+    
+    return data.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch customer growth data.');
+  }
+}

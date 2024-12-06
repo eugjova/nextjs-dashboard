@@ -6,12 +6,13 @@ export default auth(async (req) => {
   const isLoggedIn = !!req.auth;
   const isOnDashboard = req.nextUrl.pathname.startsWith('/dashboard');
   const isOnLaporanPage = req.nextUrl.pathname.startsWith('/dashboard/laporan');
+  const isOnPegawaiPage = req.nextUrl.pathname.startsWith('/dashboard/pegawai');
 
   if (isOnDashboard && !isLoggedIn) {
     return NextResponse.redirect(new URL('/login', req.nextUrl));
   }
 
-  if (isOnLaporanPage && isLoggedIn) {
+  if ((isOnLaporanPage || isOnPegawaiPage) && isLoggedIn) {
     try {
       const userId = req.auth?.user?.id;
       const roleData = await sql`

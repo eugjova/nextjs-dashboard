@@ -19,7 +19,6 @@ const getLinks = (role: string) => {
   const baseLinks = [
     { name: 'Home', href: '/dashboard', icon: HomeIcon },
     { name: 'Products', href: '/dashboard/products', icon: ShoppingBagIcon },
-    { name: 'Pegawai', href: '/dashboard/pegawai', icon: UsersIcon },
     { name: 'Customers', href: '/dashboard/customers', icon: UserGroupIcon },
     { name: 'Distributor', href: '/dashboard/distributors', icon: BuildingStorefrontIcon },
     { name: 'Penjualan', href: '/dashboard/penjualan', icon: ArrowUpOnSquareIcon },
@@ -27,6 +26,7 @@ const getLinks = (role: string) => {
   ];
 
   if (role === 'Owner') {
+    baseLinks.splice(2, 0, { name: 'Pegawai', href: '/dashboard/pegawai', icon: UsersIcon });
     baseLinks.push({ name: 'Laporan', href: '/dashboard/laporan', icon: DocumentChartBarIcon });
   }
 

@@ -175,3 +175,13 @@ export type FormattedCustomersTable = {
   createdAt: string;
   updatedAt: string;
 };
+
+declare module 'next-auth' {
+  interface User {
+    role_name: string;
+  }
+  
+  interface Session {
+    user: User;
+  }
+}

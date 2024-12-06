@@ -23,8 +23,9 @@ export async function POST(request: Request) {
     const { email, password } = result.data;
 
     const pegawai = await sql`
-      SELECT id, name, email, password
-      FROM pegawai 
+      SELECT p.id, p.name, p.email, p.password, p.id_role, r.name as role_name
+      FROM pegawai p
+      JOIN roles r ON p.id_role = r.id
       WHERE email=${email}
     `;
 

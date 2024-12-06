@@ -517,7 +517,6 @@ export async function createPegawai(formData: FormData) {
 
     const { name, phone, gender, email, password } = validatedFields.data;
     
-    // Cek email yang sudah ada
     const existingEmail = await sql`
       SELECT id FROM pegawai WHERE email = ${email}
     `;
@@ -529,7 +528,6 @@ export async function createPegawai(formData: FormData) {
       };
     }
 
-    // Cek nomor telepon yang sudah ada
     const existingPhone = await sql`
       SELECT id FROM pegawai WHERE phone = ${phone}
     `;
@@ -544,7 +542,6 @@ export async function createPegawai(formData: FormData) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const id = crypto.randomUUID();
     
-    // Ambil id_role pegawai
     const roleData = await sql`
       SELECT id FROM roles WHERE name = 'Pegawai' LIMIT 1
     `;

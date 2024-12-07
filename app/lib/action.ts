@@ -143,9 +143,29 @@ export async function createCustomer(formData: FormData) {
       }
     }
 
+    const currentDate = new Date().toISOString();
+
     await sql`
-      INSERT INTO customers (id, name, phone, gender, poin, image_url)
-      VALUES (${crypto.randomUUID()}, ${name}, ${phone}, ${gender}, ${parseInt(poin)}, ${imageId})
+      INSERT INTO customers (
+        id, 
+        name, 
+        phone, 
+        gender, 
+        poin, 
+        image_url, 
+        createdat, 
+        updatedat
+      )
+      VALUES (
+        ${crypto.randomUUID()}, 
+        ${name}, 
+        ${phone}, 
+        ${gender}, 
+        ${parseInt(poin)}, 
+        ${imageId},
+        ${currentDate},
+        ${currentDate}
+      )
     `;
 
     revalidatePath('/dashboard/customers');
@@ -217,10 +237,9 @@ export async function createPenjualan(formData: FormData) {
       total_bayar: String(formData.get('totalBayar'))?.replace(/[^0-9]/g, ''),
     };
 
-    console.log('Raw form data:', rawData);
-
     const penjualanData = PenjualanSchema.parse(rawData);
     const earnedPoin = parseInt(formData.get('earnedPoin') as string) || 0;
+    const productCount = parseInt(formData.get('productCount') as string);
 
     const penjualanId = crypto.randomUUID();
 
@@ -230,6 +249,7 @@ export async function createPenjualan(formData: FormData) {
         date,
         customerId,
         pegawaiId,
+        total_items,
         poin_used,
         total_amount,
         total_bayar
@@ -238,6 +258,7 @@ export async function createPenjualan(formData: FormData) {
         ${penjualanData.date},
         ${penjualanData.customerId},
         ${penjualanData.pegawaiId},
+        ${productCount},
         ${penjualanData.poin_used},
         ${penjualanData.total_amount},
         ${penjualanData.total_bayar}
@@ -250,15 +271,10 @@ export async function createPenjualan(formData: FormData) {
       WHERE id = ${penjualanData.customerId}
     `;
 
-    const productCount = parseInt(formData.get('productCount') as string);
-    console.log('Product count:', productCount);
-
     for (let i = 0; i < productCount; i++) {
       const productId = formData.get(`product-${i}`) as string;
       const quantity = parseInt(formData.get(`quantity-${i}`) as string);
       const price = parseInt(String(formData.get(`price-${i}`))?.replace(/[^0-9]/g, ''));
-      
-      console.log(`Product ${i}:`, { productId, quantity, price });
 
       if (!productId || isNaN(quantity) || isNaN(price)) {
         console.error(`Invalid product data at index ${i}`);

@@ -1,5 +1,3 @@
-import { Revenue } from './definitions';
-
 export const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -16,18 +14,6 @@ export const formatDateToLocal = (dateStr: string) => {
     year: 'numeric',
   };
   return new Date(dateStr).toLocaleDateString('id-ID', options);
-};
-
-export const generateYAxis = (revenue: Revenue[]) => {
-  const yAxisLabels = [];
-  const highestRecord = Math.max(...revenue.map((month) => month.revenue));
-  const topLabel = Math.ceil(highestRecord / 1000) * 1000;
-
-  for (let i = topLabel; i >= 0; i -= 1000) {
-    yAxisLabels.push(`$${i / 1000}K`);
-  }
-
-  return { yAxisLabels, topLabel };
 };
 
 export const generatePagination = (currentPage: number, totalPages: number) => {

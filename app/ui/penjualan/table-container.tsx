@@ -3,7 +3,7 @@
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { useState } from 'react';
 import { EyeIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { getPenjualanItems } from '@/app/lib/data';
+import { fetchPenjualanItems } from '@/app/lib/data';
 
 function DetailModal({ items, penjualan, onClose }: { 
   items: any[]; 
@@ -70,12 +70,12 @@ export function PenjualanTableContainer({ penjualan }: { penjualan: any[] }) {
 
   const handleShowDetail = async (penjualan: any) => {
     try {
-      const items = await getPenjualanItems(penjualan.id);
+      const items = await fetchPenjualanItems(penjualan.id);
       setDetailItems(items);
       setSelectedPenjualan(penjualan);
       setShowModal(true);
     } catch (error) {
-      console.error('Error fetching detail items:', error);
+      console.error('Error fetching details:', error);
     }
   };
 

@@ -66,7 +66,7 @@ export function ProductsTableSkeleton() {
 export function DashboardSkeleton() {
   return (
     <>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mt-16">
         {[...Array(4)].map((_, i) => (
           <div
             key={i}

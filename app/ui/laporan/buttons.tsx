@@ -2,6 +2,10 @@
 
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import * as XLSX from 'xlsx';
+import { 
+  fetchAllPenjualan, 
+  fetchAllPembelian,
+} from '@/app/lib/data';
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('id-ID', {
@@ -27,23 +31,9 @@ export function ExportButton({
     try {
       let data;
       if (type === 'penjualan') {
-        const response = await fetch(
-          `/api/laporan/penjualan?${new URLSearchParams({
-            query: query || '',
-            startDate: startDate || '',
-            endDate: endDate || ''
-          }).toString()}`
-        );
-        data = await response.json();
+        data = await fetchAllPenjualan(query, startDate, endDate);
       } else {
-        const response = await fetch(
-          `/api/laporan/pembelian?${new URLSearchParams({
-            query: query || '',
-            startDate: startDate || '',
-            endDate: endDate || ''
-          }).toString()}`
-        );
-        data = await response.json();
+        data = await fetchAllPembelian(query, startDate, endDate);
       }
 
       let formattedData;
@@ -166,7 +156,7 @@ export function ExportButton({
 
       XLSX.writeFile(workbook, `laporan_${type}_${new Date().toISOString().split('T')[0]}.xlsx`);
     } catch (error) {
-      console.error('Error exporting to Excel:', error);
+      console.error('Error exporting data:', error);
     }
   };
 

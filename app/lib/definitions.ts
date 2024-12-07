@@ -1,15 +1,13 @@
-export type PenjualanTable = {
+export type CustomerField = {
   id: string;
-  date: string;
-  nama_customer: string;
-  nama_pegawai: string;
-  total_items: number;
-  total_amount: number;
-  total_bayar: number;
-  poin_used: number;
+  name: string;
+  phone: string;
+  gender: string;
+  poin: number;
+  image_url: string;
 };
 
-export type CustomerField = {
+export type CustomersTableType = {
   id: string;
   name: string;
   phone: string;
@@ -27,82 +25,7 @@ export type ProductsField = {
   image_url: string;
 };
 
-export type PegawaiField = {
-  id: string;
-  name: string;
-  phone: string;
-  gender: string;
-  email: string;
-  password: string;
-};
-
-export type Revenue = {
-  month: string;
-  revenue: number;
-};
-
-export type CustomersTableType = {
-  id: string;
-  name: string;
-  phone: string;
-  gender: string;
-  poin: number;
-  image_url: string;
-};
-
-export type CustomersForm = {
-  id: string;
-  name: string;
-  phone: string;
-  gender: string;
-  poin: number;
-  image_url: string;
-};
-
-export type LatestCustomer = {
-  id: string;
-  name: string;
-  phone: string;
-  gender: string;
-  poin: number;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type PenjualanForm = {
-  id: string;
-  date: string;
-  customerId: string;
-  pegawaiId: string;
-  total_amount: number;
-  total_bayar: number;
-  poin_used: number;
-  customer_name?: string;
-  pegawai_name?: string;
-};
-
-export type LatestPenjualanRaw = {
-  id: string;
-  amount: number;
-  name: string;
-  email: string;
-  image_url: string;
-};
-
-export type Roles = {
-  id: string;
-  name: string;
-};
-
 export type ProductsTable = {
-  id: string;
-  name: string;
-  stock: number;
-  price: number;
-  image_url: string;
-};
-
-export type ProductForm = {
   id: string;
   name: string;
   stock: number;
@@ -118,22 +41,13 @@ export type ProductsTableType = {
   image_url: string;
 };
 
-export type DistributorField = {
+export type PegawaiField = {
   id: string;
   name: string;
   phone: string;
-};
-
-export type DistributorTableType = {
-  id: string;
-  name: string;
-  phone: string;
-};
-
-export type DistributorForm = {
-  id: string;
-  name: string;
-  phone: string;
+  gender: string;
+  email: string;
+  password: string;
 };
 
 export type Pegawai = {
@@ -165,15 +79,38 @@ export interface PegawaiForm {
   role_name: string;
 }
 
-export type FormattedCustomersTable = {
+export type DistributorField = {
   id: string;
   name: string;
   phone: string;
-  gender: string;
-  poin: number;
-  image_url: string;
-  createdAt: string;
-  updatedAt: string;
+};
+
+export type PenjualanTable = {
+  id: string;
+  date: string;
+  nama_customer: string;
+  nama_pegawai: string;
+  total_items: number;
+  total_amount: number;
+  total_bayar: number;
+  poin_used: number;
+};
+
+export type PenjualanForm = {
+  id: string;
+  date: string;
+  customerId: string;
+  pegawaiId: string;
+  total_amount: number;
+  total_bayar: number;
+  poin_used: number;
+  customer_name?: string;
+  pegawai_name?: string;
+};
+
+export type Roles = {
+  id: string;
+  name: string;
 };
 
 declare module 'next-auth' {

@@ -49,7 +49,7 @@ export default function Form() {
         return;
       }
 
-      if (!['male', 'female'].includes(gender)) {
+      if (!['Male', 'Female'].includes(gender)) {
         toast.error('Gender harus Male atau Female');
         setIsSubmitting(false);
         return;
@@ -162,8 +162,8 @@ export default function Form() {
                       defaultValue=""
                     >
                       <option value="" disabled>Pilih Gender</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
                     </select>
                     <IdentificationIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
                   </div>
